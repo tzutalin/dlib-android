@@ -4,6 +4,7 @@
 * Download Android-NDK from [Android website](https://developer.android.com/ndk/downloads/index.html).
 
 	 After downloading, go to the directory to which you downloaded the package to extract it
+
 	 `$ chmod a+x android-ndk-r10e-linux-x86_64.bin`	 
 	 `$ ./android-ndk-r10e-linux-x86_64.bin`
 	 	 
@@ -68,4 +69,4 @@ You can build only (Optional)
 ###Notes:
 * If you would like to integrate NDK into Eclipse, please refer to [android-ndk-eclipse-setup](http://tzutalin.blogspot.tw/2015/08/android-ndk-eclipse-setup.html) or [Android developer](https://developer.android.com/ndk/guides/ndk-build.html)
 
-* TODO: Some of example are not able to build succesfully. Add dlib as a submodule
+* TODO: Some of examples are not able to build succesfully. Add dlib as a submodule
