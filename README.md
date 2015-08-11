@@ -28,7 +28,7 @@
 ### Build and Run
 You can change the compiler architecture in dlib-android/jni/Application.mk
 
-Build SVM exmple (example/svm.ex.cpp). Compiler architecture is armeabi-v7a
+Build examples (example/svm.ex.cpp, examples/svr_ex.cpp, examples/max_cost_assignment_ex.cpp). Compiler architecture is armeabi-v7a
 
     $ cd ~/dlib-android
     $ sh buildandRun.sh
@@ -47,15 +47,18 @@ Output:
 	[armeabi-v7a] Compile++ thumb: svr_ex <= svr_ex.cpp
 	[armeabi-v7a] Executable     : svr_ex
 	[armeabi-v7a] Install        : svr_ex => libs/armeabi-v7a/svr_ex
+    ....
 	.... svm example
 	doing cross validation
 	gamma: 1e-05    nu: 1e-05     cross validation accuracy: 0.926984 0.347283 
 	gamma: 1e-05    nu: 5e-05     cross validation accuracy: 0.926984 0.347283 
 	gamma: 1e-05    nu: 0.00025     cross validation accuracy: 0.926984 0.347283
+    ....
 	....  max_cost_assignment example
 	number of support vectors in our learned_function is 269
 	This is a +1 class example, the classifier output is 2.24922
 	This is a +1 class example, the classifier output is 0.10343
+    ....
 	.... svr example
 	0.239389   0.23905
 	0.998334   0.997331
