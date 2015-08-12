@@ -1,5 +1,10 @@
 # dlib-android
 
+### Purpose
+* Port [dlib](http://dlib.net/) to Andriod platform
+
+* You can build it to dynamic or static library for Android. You can also build dlib's sample to Android executable file.
+
 ### Prerequisites
 * Download Android-NDK from [Android website](https://developer.android.com/ndk/downloads/index.html).
 
@@ -72,4 +77,5 @@ You can build only (Optional)
 ###Notes:
 * If you would like to integrate NDK into Eclipse, please refer to [android-ndk-eclipse-setup](http://tzutalin.blogspot.tw/2015/08/android-ndk-eclipse-setup.html) or [Android developer](https://developer.android.com/ndk/guides/ndk-build.html)
 
-* TODO: Some of examples are not able to build succesfully. Add dlib as a submodule
+* TODO: Some of examples are not able to build succesfully. 
+* Add dlib as a submodule
