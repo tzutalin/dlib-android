@@ -70,6 +70,10 @@ Output:
 	-0.189201   -0.187636
 	-0.191785   -0.218924
 	MSE and R-Squared: 2.73043e-05    0.999842
+	
+	
+	TestSelectiveSearch example, read image by opencv and find_candidate_object_locaction
+	Find proposals size: 14598 takes 1.63192 seconds
 You can build only (Optional)
 
 	$ ndk-build 
@@ -77,5 +81,6 @@ You can build only (Optional)
 ###Notes:
 * If you would like to integrate NDK into Eclipse, please refer to [android-ndk-eclipse-setup](http://tzutalin.blogspot.tw/2015/08/android-ndk-eclipse-setup.html) or [Android developer](https://developer.android.com/ndk/guides/ndk-build.html)
 
-* TODO: Some of examples are not able to build succesfully. 
-* Add dlib as a submodule
+* TODO: 
+		Some of examples are not able to build successfully. 
+		Add dlib as a submodule
