@@ -10,14 +10,14 @@
 
 	 After downloading, go to the directory to which you downloaded the package to extract it
 
-	 `$ chmod a+x android-ndk-r10e-linux-x86_64.bin`	 
+	 `$ chmod a+x android-ndk-r10e-linux-x86_64.bin`
 	 `$ ./android-ndk-r10e-linux-x86_64.bin`
-	 	 
+
 	 Export ANDROID_NDK_HOME in ~/.bashrc
-     `$ vim ~/.bashrc`  
-     
+     `$ vim ~/.bashrc`
+
 	`export ANDROID_NDK_HOME=[/to/your/path]/android-ndk-r10e`
-	
+
     `export PATH=$PATH:$ANDROID_NDK_HOME`
 
 * Install Android Debug Bride (ADB). You can download it via [Android SDK Manager](https://developer.android.com/sdk/installing/index.html) or $ sudo apt-get install android-tools-adb
@@ -70,17 +70,16 @@ Output:
 	-0.189201   -0.187636
 	-0.191785   -0.218924
 	MSE and R-Squared: 2.73043e-05    0.999842
-	
-	
+
+
 	TestSelectiveSearch example, read image by opencv and find_candidate_object_locaction
 	Find proposals size: 14598 takes 1.63192 seconds
 You can build only (Optional)
 
-	$ ndk-build 
+	$ ndk-build
 
 ###Notes:
 * If you would like to integrate NDK into Eclipse, please refer to [android-ndk-eclipse-setup](http://tzutalin.blogspot.tw/2015/08/android-ndk-eclipse-setup.html) or [Android developer](https://developer.android.com/ndk/guides/ndk-build.html)
 
-* TODO: 
-		Some of examples are not able to build successfully. 
-		Add dlib as a submodule
+* TODO:
+		Some of examples are not able to build successfully.
