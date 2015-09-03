@@ -27,7 +27,7 @@
 ### Grab the source
 
     $ cd ~
-    $ git clone https://github.com/tzutalin/dlib-android.git
+    $ git clone --recursive https://github.com/tzutalin/dlib-android.git
 
 
 ### Build and Run
