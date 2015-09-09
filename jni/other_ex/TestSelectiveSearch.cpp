@@ -2,7 +2,7 @@
 // Name        : TestSelectiveSearch.cpp
 // Author      : Tzutalin
 // Version     : 1.0
-// Copyright   : Your copyright notice
+// Copyright   : Tzutalin
 // Description : TestSelectiveSearch in C++, Ansi-style
 //============================================================================
 #include <opencv2/core/core.hpp>
