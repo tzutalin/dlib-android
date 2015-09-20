@@ -11,6 +11,7 @@
 	 After downloading, go to the directory to which you downloaded the package to extract it
 
 	 `$ chmod a+x android-ndk-r10e-linux-x86_64.bin`
+
 	 `$ ./android-ndk-r10e-linux-x86_64.bin`
 
 	 Export ANDROID_NDK_HOME in ~/.bashrc
