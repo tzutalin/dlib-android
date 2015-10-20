@@ -23,6 +23,8 @@
 
 * Install Android Debug Bride (ADB). You can download it via [Android SDK Manager](https://developer.android.com/sdk/installing/index.html) or $ sudo apt-get install android-tools-adb
 
+* You can update Android-OpenCV from http://opencv.org/downloads.html
+
 * Prepare a Android device for test
 
 ### Grab the source
