@@ -5,6 +5,8 @@
 
 * You can build it to dynamic or static library for Android. You can also build dlib's sample to Android executable file.
 
+* You can refer to [dlib-android-app](https://github.com/tzutalin/dlib-android-app) which demonstartes dlib-android features
+
 ### Prerequisites
 * Download Android-NDK from [Android website](https://developer.android.com/ndk/downloads/index.html).
 
