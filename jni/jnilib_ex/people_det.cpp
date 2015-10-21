@@ -63,7 +63,7 @@ public:
             cv::rectangle(src_img, r.tl(), r.br(), cv::Scalar(0, 255, 0), 2);
         }
         mResultMat = src_img;
-        cv::imwrite(path, mResultMat);
+        //cv::imwrite(path, mResultMat);
         LOGD("det ends");
         mRets = found_filtered;
         return found_filtered.size();
@@ -110,8 +110,7 @@ public:
             r.height = cvRound(r.height * 0.9);
             cv::rectangle(src_img, r.tl(), r.br(), cv::Scalar(0, 255, 0), 2);
         }
-        cv::imwrite(path, src_img);
-
+        //cv::imwrite(path, src_img);
         return mRets.size();
     }
 
@@ -124,8 +123,8 @@ private:
     std::vector<dlib::rectangle> mRets;
 };
 
-OpencvHOGDetctor* mOpencvHOGDetctor;
-DLibHOGFaceDetector* mDlibFaceDetector;
+OpencvHOGDetctor* mOpencvHOGDetctor = NULL;
+DLibHOGFaceDetector* mDlibFaceDetector = NULL;
 
 #ifdef __cplusplus
 extern "C" {
@@ -177,10 +176,12 @@ Java_com_tzutalin_dlib_PeopleDet_jniOpencvHOGDetect(
 {
     LOGD("com_tzutalin_dlib_PeopleDet jniOpencvHOGDetect");
     const char *img_path = env->GetStringUTFChars(imgPath, 0);
-    OpencvHOGDetctor hogdet;
-    hogdet.det(std::string(img_path));
+    if(mOpencvHOGDetctor == NULL)
+        mOpencvHOGDetctor = new OpencvHOGDetctor();
+
+    int nums = mOpencvHOGDetctor->det(std::string(img_path));
     env->ReleaseStringUTFChars(imgPath, img_path);
-    return 0;
+    return nums;
 }
 
 jint JNIEXPORT JNICALL
@@ -207,7 +208,9 @@ Java_com_tzutalin_dlib_PeopleDet_jniDLibHOGDetect(
 {
     LOGD("com_tzutalin_dlib_PeopleDet jniDLibHOGDetect");
     const char *img_path = env->GetStringUTFChars(imgPath, 0);
-    mDlibFaceDetector = new DLibHOGFaceDetector();
+    if(mDlibFaceDetector == NULL)
+        mDlibFaceDetector = new DLibHOGFaceDetector();
+
     int size = mDlibFaceDetector->det(std::string(img_path));
     env->ReleaseStringUTFChars(imgPath, img_path);
     return size;
@@ -230,6 +233,33 @@ Java_com_tzutalin_dlib_PeopleDet_jniGetDLibRet(JNIEnv* env,
     }
     return -1;
 }
+
+jint JNIEXPORT JNICALL
+Java_com_tzutalin_dlib_PeopleDet_jniInit(JNIEnv* env, jobject thiz)
+{
+
+    if(mDlibFaceDetector == NULL)
+        mDlibFaceDetector = new DLibHOGFaceDetector();
+
+    if (mOpencvHOGDetctor == NULL)
+        mOpencvHOGDetctor = new OpencvHOGDetctor();
+
+    return 0;
+}
+
+
+jint JNIEXPORT JNICALL
+Java_com_tzutalin_dlib_PeopleDet_jniDeInit(JNIEnv* env, jobject thiz)
+{
+    if(mDlibFaceDetector)
+        delete mDlibFaceDetector;
+
+    if (mOpencvHOGDetctor)
+        delete mOpencvHOGDetctor;
+
+    return 0;
+}
+
 
 #ifdef __cplusplus
 }
