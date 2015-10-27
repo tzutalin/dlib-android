@@ -91,15 +91,16 @@ public:
     inline int det(std::string path) {
         dlib::frontal_face_detector detector =
                 dlib::get_frontal_face_detector();
-        dlib::array2d<dlib::rgb_pixel> img;
-        load_image(img, path);
-        //dlib::pyramid_up(img);
+
+        cv::Mat src_img = cv::imread(path, 1);
+        dlib::cv_image<dlib::bgr_pixel> img(src_img);
+
         mRets = detector(img);
         LOGD("Dlib HOG face det size : %d", mRets.size());
 
+        /*
         // Draw on the input for test
         int i = 0;
-        cv::Mat src_img = cv::imread(path, 1);
         for (i = 0; i < mRets.size(); i++) {
             dlib::rectangle dlibrect = mRets[i];
             cv::Rect r(dlibrect.left(), dlibrect.top(), dlibrect.width(),
@@ -110,7 +111,8 @@ public:
             r.height = cvRound(r.height * 0.9);
             cv::rectangle(src_img, r.tl(), r.br(), cv::Scalar(0, 255, 0), 2);
         }
-        //cv::imwrite(path, src_img);
+        cv::imwrite(path, src_img);
+        */
         return mRets.size();
     }
 
