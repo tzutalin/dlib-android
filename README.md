@@ -38,53 +38,23 @@
 ### Build and Run
 You can change the compiler architecture in dlib-android/jni/Application.mk
 
-Build examples (example/svm.ex.cpp, examples/svr_ex.cpp, examples/max_cost_assignment_ex.cpp). Compiler architecture is armeabi-v7a
+Build executable files and shared library, and push the executable files to Android devices. 
 
-    $ cd ~/dlib-android
+    $ cd [$dlib-android]
     $ sh buildandRun.sh
 
-Output:
-
-	[armeabi-v7a] Compile++ thumb: max_cost_assignment_ex <= max_cost_assignment_ex.cpp
-	[armeabi-v7a] Compile++ thumb: dlib <= save_jpeg.cpp
-	[armeabi-v7a] Compile++ thumb: dlib <= save_png.cpp
-	[armeabi-v7a] StaticLibrary  : libdlib.a
-	[armeabi-v7a] Executable     : max_cost_assignment_ex
-	[armeabi-v7a] Install        : max_cost_assignment_ex => libs/armeabi-v7a/max_cost_assignment_ex
-	[armeabi-v7a] Compile++ thumb: svm_ex <= svm_ex.cpp
-	[armeabi-v7a] Executable     : svm_ex
-	[armeabi-v7a] Install        : svm_ex => libs/armeabi-v7a/svm_ex
-	[armeabi-v7a] Compile++ thumb: svr_ex <= svr_ex.cpp
-	[armeabi-v7a] Executable     : svr_ex
-	[armeabi-v7a] Install        : svr_ex => libs/armeabi-v7a/svr_ex
-    ....
-	.... svm example
-	doing cross validation
-	gamma: 1e-05    nu: 1e-05     cross validation accuracy: 0.926984 0.347283 
-	gamma: 1e-05    nu: 5e-05     cross validation accuracy: 0.926984 0.347283 
-	gamma: 1e-05    nu: 0.00025     cross validation accuracy: 0.926984 0.347283
-    ....
-	....  max_cost_assignment example
-	number of support vectors in our learned_function is 269
-	This is a +1 class example, the classifier output is 2.24922
-	This is a +1 class example, the classifier output is 0.10343
-    ....
-	.... svr example
-	0.239389   0.23905
-	0.998334   0.997331
-	-0.189201   -0.187636
-	-0.191785   -0.218924
-	MSE and R-Squared: 2.73043e-05    0.999842
-
-
-	TestSelectiveSearch example, read image by opencv and find_candidate_object_locaction
-	Find proposals size: 14598 takes 1.63192 seconds
 You can build only (Optional)
 
 	$ ndk-build
 
+### Write JNI and build shared library for Android Java application
+There are examples in [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
+
+There is a sample app to demonstarte the result. [dlib-android-app](https://github.com/tzutalin/dlib-android-app) 
+
+### Do you want to contribute
+ If you have any improvement or you've found any bug, send a pull request with the code 
+
+
 ###Notes:
 * If you would like to integrate NDK into Eclipse, please refer to [android-ndk-eclipse-setup](http://tzutalin.blogspot.tw/2015/08/android-ndk-eclipse-setup.html) or [Android developer](https://developer.android.com/ndk/guides/ndk-build.html)
-
-* TODO:
-		Some of examples are not able to build successfully.
