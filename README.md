@@ -1,3 +1,4 @@
+
 # dlib-android
 
 ### Purpose
@@ -6,6 +7,11 @@
 * You can build it to dynamic or static library for Android. You can also build dlib's sample to Android executable file.
 
 * You can refer to [dlib-android-app](https://github.com/tzutalin/dlib-android-app) which demonstartes dlib-android features
+
+### Grab the source
+
+    $ cd ~
+    $ git clone --recursive https://github.com/tzutalin/dlib-android.git
 
 ### Prerequisites
 * Download Android-NDK from [Android website](https://developer.android.com/ndk/downloads/index.html).
@@ -25,14 +31,9 @@
 
 * Install Android Debug Bride (ADB). You can download it via [Android SDK Manager](https://developer.android.com/sdk/installing/index.html) or $ sudo apt-get install android-tools-adb
 
-* You can update Android-OpenCV from http://opencv.org/downloads.html
+* [Optional] You can download a specific Android-OpenCV from http://opencv.org/downloads.html.  Download the version and copy the folders in native SDK to dlib-android/opencv
 
 * Prepare a Android device for test
-
-### Grab the source
-
-    $ cd ~
-    $ git clone --recursive https://github.com/tzutalin/dlib-android.git
 
 
 ### Build and Run
