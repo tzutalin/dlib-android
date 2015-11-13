@@ -14,7 +14,7 @@ adb push libs/armeabi-v7a/svr_ex /data/local/tmp
 adb shell ./data/local/tmp/svr_ex
 
 # find object samples
-adb push jni/other_ex/data/lena.jpg /sdcard/lena.jpg
+adb push jni/other_daemon_ex/data/lena.jpg /sdcard/lena.jpg
 adb push libs/armeabi-v7a/TestSelectiveSearch /data/local/tmp
 adb shell ./data/local/tmp/TestSelectiveSearch /sdcard/lena.jpg
 # face_lardmark_ex, need to push shape_predictor_68_face_landmarks.dat to mobile devies
