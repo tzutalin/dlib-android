@@ -31,5 +31,9 @@ ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)
 LOCAL_ARM_NEON := true
 endif
 
+#LOCAL_CFLAGS += -pie -fPIE
+#LOCAL_LDFLAGS += -pie -fPIE
+#include $(BUILD_EXECUTABLE)
+
 include $(BUILD_SHARED_LIBRARY)
 #-----------------------------------------------------------------------------
