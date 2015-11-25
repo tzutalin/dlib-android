@@ -6,12 +6,12 @@ include $(CLEAR_VARS)
 OpenCV_INSTALL_MODULES := on
 OPENCV_CAMERA_MODULES := off
 OPENCV_LIB_TYPE := STATIC
-include $(LOCAL_PATH)/../../opencv/jni/OpenCV.mk
+include $(LOCAL_PATH)/../opencv/jni/OpenCV.mk
 
 LOCAL_MODULE := people_det
 
 LOCAL_C_INCLUDES :=  \
-    $(LOCAL_PATH)/../../opencv/jni/include \
+    $(LOCAL_PATH)/../opencv/jni/include \
     $(LOCAL_PATH)/../dlib \
 
 

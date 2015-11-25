@@ -7,13 +7,13 @@ include $(CLEAR_VARS)
 OpenCV_INSTALL_MODULES := on
 OPENCV_CAMERA_MODULES := off
 OPENCV_LIB_TYPE := STATIC
-include $(LOCAL_PATH)/../../opencv/jni/OpenCV.mk
+include $(LOCAL_PATH)/../opencv/jni/OpenCV.mk
 
 LOCAL_MODULE := TestSelectiveSearch
 # LOCAL_MODULE_TAGS := optional
 
 LOCAL_C_INCLUDES :=  \
-    $(LOCAL_PATH)/../../opencv/jni/include \
+    $(LOCAL_PATH)/../opencv/jni/include \
     $(LOCAL_PATH)/../dlib \
     $(LOCAL_PATH)/../dlib/all/source.cpp
 
@@ -41,12 +41,12 @@ include $(CLEAR_VARS)
 OpenCV_INSTALL_MODULES := on
 OPENCV_CAMERA_MODULES := off
 OPENCV_LIB_TYPE := STATIC
-include $(LOCAL_PATH)/../../opencv/jni/OpenCV.mk
+include $(LOCAL_PATH)/../opencv/jni/OpenCV.mk
 
 LOCAL_MODULE := face_landmark
 
 LOCAL_C_INCLUDES :=  \
-    $(LOCAL_PATH)/../../opencv/jni/include \
+    $(LOCAL_PATH)/../opencv/jni/include \
     $(LOCAL_PATH)/../dlib \
 
 LOCAL_SRC_FILES := ../dlib//dlib/threads/threads_kernel_shared.cpp \
