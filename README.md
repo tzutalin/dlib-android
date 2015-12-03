@@ -34,7 +34,6 @@
 
 * Prepare a Android device for test
 
-
 ### Build and Run
 You can change the compiler architecture in dlib-android/jni/Application.mk
 
@@ -52,6 +51,10 @@ You can build only (Optional)
 
 	$ ndk-build -j 2
 
+You can also try to build the libraray and Android app together using Android stduio
+
+Please refer to [dlib-anroid-app](https://github.com/tzutalin/dlib-android-app)
+
 ### Write JNI and build shared library for Android Java application
 There are examples in [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
 
@@ -64,8 +67,7 @@ There is a sample app to demonstrate the result. [dlib-android-app](https://gith
 ###Notes:
 * If you would like to integrate NDK into Eclipse, please refer to [android-ndk-eclipse-setup](http://tzutalin.blogspot.tw/2015/08/android-ndk-eclipse-setup.html) or [Android developer](https://developer.android.com/ndk/guides/ndk-build.html)
 
+You can also try to build [the libraray and Android app together using Android stduio](https://github.com/tzutalin/dlib-android-app)
 
 ### Future task
 * Add more examples to [dlib-anroid-app](https://github.com/tzutalin/dlib-android-app)
-
-* Intgrate to Android - studio using gradle or Bazel build
