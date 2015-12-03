@@ -146,7 +146,21 @@ protected:
 };
 
 class DLibHOGFaceDetector : public DLibHOGDetector {
+private:
+    std::string mLandMarkModel;
+    dlib::shape_predictor msp;
+
 public:
+    DLibHOGFaceDetector()
+    {
+        mLandMarkModel = "";
+    }
+
+    DLibHOGFaceDetector(std::string landmarkmodel)
+    {
+        mLandMarkModel = landmarkmodel;
+        dlib::deserialize(mLandMarkModel) >> msp;
+    }
 
     virtual inline int det(std::string path)
     {
@@ -158,6 +172,16 @@ public:
         mRets = detector(img);
         LOGD("Dlib HOG face det size : %d", mRets.size());
 
+        if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
+            std::vector<dlib::full_object_detection> shapes;
+            for (unsigned long j = 0; j < mRets.size(); ++j) {
+                dlib::full_object_detection shape = msp(img, mRets[j]);
+                //cout << "number of parts: "<< shape.num_parts() << endl;
+                //cout << "pixel position of first part:  " << shape.part(0) << endl;
+                //cout << "pixel position of second part: " << shape.part(1) << endl;
+                shapes.push_back(shape);
+            }
+        }
         /*
         // Draw on the input for test
         int i = 0;
@@ -321,8 +345,8 @@ jint JNIEXPORT JNICALL
 
 int main()
 {
-	const int INPUT_IMG_MAX_SIZE = 800;
-	const int INPUT_IMG_MIN_SIZE = 600;
+    const int INPUT_IMG_MAX_SIZE = 800;
+    const int INPUT_IMG_MIN_SIZE = 600;
     std::string path = "/sdcard/test.jpg";
 
     cv::Mat src_img = cv::imread(path, 1);
@@ -352,13 +376,13 @@ int main()
 
     double thresh = 0.5;
     std::vector<dlib::rectangle> dets = detector(cimg, thresh);
-    std::cout<< "size: " << dets.size() << std::endl;
+    std::cout << "size: " << dets.size() << std::endl;
 
     int i = 0;
     for (i = 0; i < dets.size(); i++) {
         dlib::rectangle dlibrect = dets[i];
         cv::Rect r(dlibrect.left(), dlibrect.top(), dlibrect.width(),
-                dlibrect.height());
+                   dlibrect.height());
         r.x += cvRound(r.width * 0.1);
         r.width = cvRound(r.width * 0.8);
         r.y += cvRound(r.height * 0.06);

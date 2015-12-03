@@ -2,9 +2,8 @@
 import os
 import sys
 import subprocess
-import shutil
 import argparse
-
+from distutils.dir_util import copy_tree
 def parse_args():
     """
     Parse input arguments
@@ -62,9 +61,9 @@ def copytree(src, dst, symlinks=False, ignore=None):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
+            copy_tree(s, d, symlinks, ignore)
         else:
-            shutil.copy2(s, d)
+            print 'Copy errors'
 
 if __name__ == '__main__':
     args = parse_args()
