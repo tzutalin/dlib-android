@@ -1,3 +1,0 @@
-[submodule "jni/dlib"]
-	path = jni/dlib
-	url = https://github.com/tzutalin/dlib.git
