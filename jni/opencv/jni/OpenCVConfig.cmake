@@ -7,7 +7,7 @@
 #    In your CMakeLists.txt, add these lines:
 #
 #    find_package(OpenCV REQUIRED)
-#    include_directories(${OpenCV_INCLUDE_DIRS})
+#    include_directories(${OpenCV_INCLUDE_DIRS}) # Not needed for CMake >= 2.8.11
 #    target_link_libraries(MY_TARGET_NAME ${OpenCV_LIBS})
 #
 #    Or you can search for specific OpenCV modules:
@@ -21,9 +21,9 @@
 #      - OpenCV_INCLUDE_DIRS             : The OpenCV include directories.
 #      - OpenCV_COMPUTE_CAPABILITIES     : The version of compute capability.
 #      - OpenCV_ANDROID_NATIVE_API_LEVEL : Minimum required level of Android API.
-#      - OpenCV_VERSION                  : The version of this OpenCV build: "3.0.0"
+#      - OpenCV_VERSION                  : The version of this OpenCV build: "3.1.0"
 #      - OpenCV_VERSION_MAJOR            : Major version part of OpenCV_VERSION: "3"
-#      - OpenCV_VERSION_MINOR            : Minor version part of OpenCV_VERSION: "0"
+#      - OpenCV_VERSION_MINOR            : Minor version part of OpenCV_VERSION: "1"
 #      - OpenCV_VERSION_PATCH            : Patch version part of OpenCV_VERSION: "0"
 #      - OpenCV_VERSION_STATUS           : Development status of this build: ""
 #
@@ -100,7 +100,7 @@ set(OpenCV_USE_NVCUVID  )
 if(ANDROID)
   set(OpenCV_ANDROID_NATIVE_API_LEVEL 8)
 else()
-  set(OpenCV_ANDROID_NATIVE_API_LEVEL 0)
+  set(OpenCV_ANDROID_NATIVE_API_LEVEL 8)
 endif()
 
 # Some additional settings are required if OpenCV is built as static libs
@@ -147,9 +147,9 @@ mark_as_advanced(FORCE OpenCV_LIB_DIR_OPT OpenCV_LIB_DIR_DBG OpenCV_3RDPARTY_LIB
 # ======================================================
 #  Version variables:
 # ======================================================
-SET(OpenCV_VERSION 3.0.0)
+SET(OpenCV_VERSION 3.1.0)
 SET(OpenCV_VERSION_MAJOR  3)
-SET(OpenCV_VERSION_MINOR  0)
+SET(OpenCV_VERSION_MINOR  1)
 SET(OpenCV_VERSION_PATCH  0)
 SET(OpenCV_VERSION_TWEAK  0)
 SET(OpenCV_VERSION_STATUS "")
@@ -158,7 +158,8 @@ SET(OpenCV_VERSION_STATUS "")
 # Link libraries: e.g. opencv_core;opencv_imgproc; etc...
 # ====================================================================
 
-SET(OpenCV_LIB_COMPONENTS opencv_videostab;opencv_videoio;opencv_video;opencv_superres;opencv_stitching;opencv_shape;opencv_photo;opencv_objdetect;opencv_ml;opencv_imgproc;opencv_imgcodecs;opencv_highgui;opencv_hal;opencv_flann;opencv_features2d;opencv_core;opencv_calib3d;opencv_java)
+SET(OpenCV_LIB_COMPONENTS opencv_videostab;opencv_videoio;opencv_video;opencv_superres;opencv_stitching;opencv_shape;opencv_photo;opencv_objdetect;opencv_ml;opencv_imgproc;opencv_imgcodecs;opencv_highgui;opencv_flann;opencv_features2d;opencv_core;opencv_calib3d;opencv_java)
+list(REMOVE_ITEM OpenCV_LIB_COMPONENTS opencv_hal)
 SET(OpenCV_WORLD_COMPONENTS )
 
 # ==============================================================
@@ -175,6 +176,20 @@ if(OpenCV2_INCLUDE_DIRS)
     set(OpenCV_3RDPARTY_LIB_DIR_OPT "${OpenCV_3RDPARTY_LIB_DIR_OPT}/Release")
     set(OpenCV_3RDPARTY_LIB_DIR_DBG "${OpenCV_3RDPARTY_LIB_DIR_DBG}/Debug")
   endif()
+endif()
+
+if(NOT CMAKE_VERSION VERSION_LESS "2.8.11")
+  # Target property INTERFACE_INCLUDE_DIRECTORIES available since 2.8.11:
+  # * http://www.cmake.org/cmake/help/v2.8.11/cmake.html#prop_tgt:INTERFACE_INCLUDE_DIRECTORIES
+  foreach(__component ${OpenCV_LIB_COMPONENTS})
+    if(TARGET ${__component})
+      set_target_properties(
+          ${__component}
+          PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${OpenCV_INCLUDE_DIRS}"
+      )
+    endif()
+  endforeach()
 endif()
 
 # ==============================================================

@@ -48,6 +48,7 @@
 #include <cmath>
 #include <float.h>
 #include <stdlib.h>
+#include "opencv2/core/cvdef.h"
 
 #define OPENCV_HAL_ADD(a, b) ((a) + (b))
 #define OPENCV_HAL_AND(a, b) ((a) & (b))
@@ -59,6 +60,10 @@
 // access from within opencv code more accessible
 namespace cv {
 
+//! @addtogroup core_hal_intrin
+//! @{
+
+//! @cond IGNORED
 template<typename _Tp> struct V_TypeTraits
 {
     typedef _Tp int_type;
@@ -82,6 +87,7 @@ template<> struct V_TypeTraits<uchar>
     typedef int sum_type;
 
     typedef ushort w_type;
+    typedef unsigned q_type;
 
     enum { delta = 128, shift = 8 };
 
@@ -99,6 +105,7 @@ template<> struct V_TypeTraits<schar>
     typedef int sum_type;
 
     typedef short w_type;
+    typedef int q_type;
 
     enum { delta = 128, shift = 8 };
 
@@ -265,28 +272,49 @@ template<> struct V_TypeTraits<double>
     }
 };
 
+template <typename T> struct V_SIMD128Traits
+{
+    enum { nlanes = 16 / sizeof(T) };
+};
+
+//! @endcond
+
+//! @}
+
 }
+
+#ifdef CV_DOXYGEN
+#   undef CV_SSE2
+#   undef CV_NEON
+#endif
 
 #if CV_SSE2
 
-#include "opencv2/hal/intrin_sse.hpp"
+#include "opencv2/core/hal/intrin_sse.hpp"
 
 #elif CV_NEON
 
-#include "opencv2/hal/intrin_neon.hpp"
+#include "opencv2/core/hal/intrin_neon.hpp"
 
 #else
 
-#include "opencv2/hal/intrin_cpp.hpp"
+#include "opencv2/core/hal/intrin_cpp.hpp"
 
 #endif
 
+//! @addtogroup core_hal_intrin
+//! @{
+
 #ifndef CV_SIMD128
+//! Set to 1 if current compiler supports vector extensions (NEON or SSE is enabled)
 #define CV_SIMD128 0
 #endif
 
 #ifndef CV_SIMD128_64F
+//! Set to 1 if current intrinsics implementation supports 64-bit float vectors
 #define CV_SIMD128_64F 0
 #endif
+
+//! @}
 
 #endif

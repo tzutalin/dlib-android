@@ -18,7 +18,7 @@ OPENCV_LIBS_DIR:=$(OPENCV_THIS_DIR)/../libs/$(OPENCV_TARGET_ARCH_ABI)
 OPENCV_3RDPARTY_LIBS_DIR:=$(OPENCV_THIS_DIR)/../3rdparty/libs/$(OPENCV_TARGET_ARCH_ABI)
 OPENCV_BASEDIR:=
 OPENCV_LOCAL_C_INCLUDES:="$(LOCAL_PATH)/$(OPENCV_THIS_DIR)/include/opencv" "$(LOCAL_PATH)/$(OPENCV_THIS_DIR)/include"
-OPENCV_MODULES:=shape stitching objdetect superres videostab calib3d features2d highgui videoio imgcodecs video photo ml imgproc flann core hal
+OPENCV_MODULES:=shape stitching objdetect superres videostab calib3d features2d highgui videoio imgcodecs video photo ml imgproc flann core
 OPENCV_SUB_MK:=$(call my-dir)/OpenCV-$(TARGET_ARCH_ABI).mk
 
 ifeq ($(OPENCV_LIB_TYPE),)
