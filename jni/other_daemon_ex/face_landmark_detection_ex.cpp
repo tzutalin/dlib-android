@@ -12,8 +12,6 @@
    and was trained on the iBUG 300-W face landmark dataset.
 */
 //============================================================================
-#include <ctime>
-#include <chrono>
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
 #include <dlib/image_processing.h>
