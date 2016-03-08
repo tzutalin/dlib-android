@@ -204,6 +204,7 @@ public:
 OpencvHOGDetctor* mOpencvHOGDetctor = NULL;
 DLibHOGDetector* mDLibDetector = NULL;
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -234,8 +235,11 @@ jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
     return JNI_VERSION_1_6;
 }
 
+#define DLIB_JNI_METHOD(METHOD_NAME) \
+    Java_com_tzutalin_dlib_PeopleDet_##METHOD_NAME
+
 void JNIEXPORT
-    JNICALL Java_com_tzutalin_dlib_PeopleDet_jniNativeClassInit(JNIEnv* _env,
+    DLIB_JNI_METHOD(jniNativeClassInit)(JNIEnv* _env,
                                                                 jclass _this)
 {
     jclass detRetClass = _env->FindClass("com/tzutalin/dlib/VisionDetRet");
@@ -251,7 +255,7 @@ void JNIEXPORT
 }
 
 jint JNIEXPORT JNICALL
-    Java_com_tzutalin_dlib_PeopleDet_jniOpencvHOGDetect(
+    DLIB_JNI_METHOD(jniOpencvHOGDetect)(
         JNIEnv* env, jobject thiz, jstring imgPath)
 {
     LOGD("com_tzutalin_dlib_PeopleDet jniOpencvHOGDetect");
@@ -265,8 +269,8 @@ jint JNIEXPORT JNICALL
 }
 
 jint JNIEXPORT JNICALL
-    Java_com_tzutalin_dlib_PeopleDet_jniGetOpecvHOGRet(JNIEnv* env,
-                                                       jobject thiz, jobject detRet, jint index)
+    DLIB_JNI_METHOD(jniGetOpecvHOGRet)(
+            JNIEnv* env, jobject thiz, jobject detRet, jint index)
 {
     if (mOpencvHOGDetctor) {
         cv::Rect rect = mOpencvHOGDetctor->getResult()[index];
@@ -283,7 +287,7 @@ jint JNIEXPORT JNICALL
 }
 
 jint JNIEXPORT JNICALL
-    Java_com_tzutalin_dlib_PeopleDet_jniDLibHOGDetect(
+    DLIB_JNI_METHOD(jniDLibHOGDetect)(
         JNIEnv* env, jobject thiz, jstring imgPath, jobject detRet)
 {
     LOGD("com_tzutalin_dlib_PeopleDet jniDLibHOGDetect");
@@ -297,8 +301,8 @@ jint JNIEXPORT JNICALL
 }
 
 jint JNIEXPORT JNICALL
-    Java_com_tzutalin_dlib_PeopleDet_jniGetDLibRet(JNIEnv* env,
-                                                   jobject thiz, jobject detRet, jint index)
+    DLIB_JNI_METHOD(jniGetDLibRet)(
+            JNIEnv* env, jobject thiz, jobject detRet, jint index)
 {
     if (mDLibDetector) {
         dlib::rectangle rect = mDLibDetector->getResult()[index];
@@ -315,7 +319,7 @@ jint JNIEXPORT JNICALL
 }
 
 jint JNIEXPORT JNICALL
-    Java_com_tzutalin_dlib_PeopleDet_jniInit(JNIEnv* env, jobject thiz)
+    DLIB_JNI_METHOD(jniInit)(JNIEnv* env, jobject thiz)
 {
 
     if (mDLibDetector == NULL)
@@ -328,7 +332,7 @@ jint JNIEXPORT JNICALL
 }
 
 jint JNIEXPORT JNICALL
-    Java_com_tzutalin_dlib_PeopleDet_jniDeInit(JNIEnv* env, jobject thiz)
+    DLIB_JNI_METHOD(jniDeInit)(JNIEnv* env, jobject thiz)
 {
     if (mDLibDetector)
         delete mDLibDetector;
