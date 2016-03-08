@@ -14,6 +14,7 @@ Test it:
 
 Result:
 ```
+take 0.00635206 seconds
 number of parts: 68
 pixel position of first part:  (220, 269)
 pixel position of second part: (218, 298)

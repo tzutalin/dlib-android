@@ -12,6 +12,8 @@
    and was trained on the iBUG 300-W face landmark dataset.
 */
 //============================================================================
+#include <ctime>
+#include <chrono>
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
 #include <dlib/image_processing.h>
@@ -21,6 +23,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
+
 using namespace dlib;
 using namespace std;
 
@@ -51,7 +54,11 @@ int main(int argc, char** argv)
         std::vector<full_object_detection> shapes;
         for (unsigned long j = 0; j < dets.size(); ++j)
         {
+            int64 t0 = cv::getTickCount();
             full_object_detection shape = sp(img, dets[j]);
+            int64 t1 = cv::getTickCount();
+            double secs = (t1-t0)/cv::getTickFrequency();
+            cout << "take " << secs << " seconds "<< endl;
             cout << "number of parts: "<< shape.num_parts() << endl;
             cout << "pixel position of first part:  " << shape.part(0) << endl;
             cout << "pixel position of second part: " << shape.part(1) << endl;

@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 import os
 import sys
-import subprocess
 import argparse
 from distutils.dir_util import copy_tree
+import subprocess
+from subprocess import Popen, PIPE
+
+DEVICE_ABI = 'armeabi-v7a';
+
 def parse_args():
     """
     Parse input arguments
@@ -21,7 +25,7 @@ def parse_args():
                         default=False, type=bool)
 
     parser.add_argument('--test', dest='test',
-                        help='Push TestSelectiveSearch sample to arm device to test',
+                        help='Push TestSelectiveSearch sample to device to test',
                         default=False, type=bool)
 
 
@@ -35,26 +39,50 @@ def build(jobs):
 def clean():
     subprocess.call(['ndk-build', 'clean'])
 
+def setDeviceABI():
+    global DEVICE_ABI
+    p = subprocess.Popen(['adb', 'shell', 'getprop', 'ro.product.cpu.abi'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate(b"input data that is passed to subprocess' stdin")
+    rc = p.returncode
+    if rc == 0:
+        if "x86" in output:
+            DEVICE_ABI = 'x86'
+
+
+    print 'ABI:' + DEVICE_ABI
+
 def test():
+    global DEVICE_ABI
     # Test max_cost_assignment_ex daemon example
     print '----max_cost_assignment_ex daemon test'
-    print '----Push svm_ex to arm device'
-    srcFolder = os.path.join('libs', 'armeabi-v7a', 'max_cost_assignment_ex')
+    print '----Push svm_ex to phone device'
+    srcFolder = os.path.join('libs', DEVICE_ABI, 'max_cost_assignment_ex')
     subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp'])
     print '----Execute /data/local/tmp/max_cost_assignment_ex'
     subprocess.call(['adb', 'shell', './data/local/tmp/max_cost_assignment_ex'])
 
     print '\n\n'
-    # Test dlib's selective search
+    print 'Test dlib selective search'
     print '----selective search algorithm'
-    srcFolder = os.path.join('jni','other_daemon_ex', 'data', 'lena.jpg')
-    print '----Push test image to sdcard'
-    subprocess.call(['adb', 'push', srcFolder, '/sdcard/lena.jpg'])
-    srcFolder = os.path.join('libs', 'armeabi-v7a', 'TestSelectiveSearch')
+    srcFolder = os.path.join('data', 'lena.jpg')
+    print '----Push test image to data/local/tmp'
+    subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp/lena.jpg'])
     print '----Push daemon to /data/local/tmp'
+    srcFolder = os.path.join('libs', DEVICE_ABI, 'TestSelectiveSearch')
     subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp'])
     print '----Execute /data/local/tmp/TestSelectiveSearch'
-    subprocess.call(['adb', 'shell', './data/local/tmp/TestSelectiveSearch','/sdcard/lena.jpg'])
+    subprocess.call(['adb', 'shell', './data/local/tmp/TestSelectiveSearch','/data/local/tmp/lena.jpg'])
+
+    print '\n\n'
+    print 'Test face landmark'
+    srcFolder = os.path.join('data', 'lena.bmp')
+    subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp'])
+    srcFolder = os.path.join('data', 'shape_predictor_68_face_landmarks.dat')
+    subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp'])
+    srcFolder = os.path.join('libs', DEVICE_ABI, 'face_landmark')
+    subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp'])
+    print '----Execute /data/local/tmp/face_lanmark'
+    subprocess.call(['adb', 'shell', './data/local/tmp/face_landmark', '/data/local/tmp/shape_predictor_68_face_landmarks.dat', '/data/local/tmp/lena.bmp'])
 
 def copytree(src, dst, symlinks=False, ignore=None):
     for item in os.listdir(src):
@@ -66,6 +94,8 @@ def copytree(src, dst, symlinks=False, ignore=None):
             print 'Copy errors'
 
 if __name__ == '__main__':
+    setDeviceABI()
+
     args = parse_args()
     if args.clean is True:
         clean()

@@ -39,17 +39,17 @@ You can change the compiler architecture in dlib-android/jni/Application.mk
 
 Build executable files and shared library, and push the executable files to Android devices. 
 
-    $ cd [$dlib-android]
+    `$ cd [$dlib-android]`
     
-    Run a test daemon sample on your arm devices
-    $ python build_push.py --test true
+    Run all test daemons on your arm/x86 devices
+    `$ python build_push.py --test true`
     
     Copy the shared lib to your Android project
-    $ python build_push.py --android_project dlib-android-appliciton/dlib/src/main/jniLibs/
+    `$ python build_push.py --android_project dlib-android-appliciton/dlib/src/main/jniLibs/`
 
 You can build only (Optional)
 
-	$ ndk-build -j 2
+	`$ ndk-build -j 2`
 
 You can also try to build the libraray and Android app together using Android stduio
 
@@ -58,10 +58,10 @@ Please refer to [dlib-anroid-app](https://github.com/tzutalin/dlib-android-app)
 ### Write JNI and build shared library for Android Java application
 There are examples in [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
 
-There is a sample app to demonstrate the result. [dlib-android-app](https://github.com/tzutalin/dlib-android-app) 
+There is a sample app to demonstrate the result. [dlib-android-app](https://github.com/tzutalin/dlib-android-app)
 
 ### Do you want to contribute
- If you have any improvement or you've found any bug, send a pull request with the code 
+ If you have any improvement or you've found any bug, send a pull request with the code
 
 
 ###Notes:
