@@ -23,12 +23,7 @@
 #include <dlib/image_processing.h>
 #include <dlib/opencv.h>
 
-#define LOG_TAG "People_Det-JNI"
-#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#include <glog/logging.h>
 
 class OpencvHOGDetctor {
 public:
@@ -38,7 +33,7 @@ public:
 
     inline int det(std::string path)
     {
-        LOGD("det path %s", path.c_str());
+        LOG(INFO) << "det path : " << path;
         cv::Mat src_img = cv::imread(path, 1);
         if (src_img.empty())
             return 0;
@@ -68,7 +63,7 @@ public:
         }
         mResultMat = src_img;
         //cv::imwrite(path, mResultMat);
-        LOGD("det ends");
+        LOG(INFO) << "det ends";
         mRets = found_filtered;
         return found_filtered.size();
     }
@@ -170,7 +165,7 @@ public:
         dlib::cv_image<dlib::bgr_pixel> img(src_img);
 
         mRets = detector(img);
-        LOGD("Dlib HOG face det size : %d", mRets.size());
+        LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
 
         if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
             std::vector<dlib::full_object_detection> shapes;
@@ -223,12 +218,13 @@ struct VisionDetRetOffsets {
 // ========================================================
 jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
 {
-    LOGE("JNI On Load");
+    LOG(INFO) << "JNI On Load";
     JNIEnv* env = NULL;
     jint result = -1;
 
-    if (vm->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK) {
-        LOGE("GetEnv failed!");
+    if (vm->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK)
+    {
+        LOG(FATAL) << "GetEnv failed!";
         return result;
     }
 
@@ -239,8 +235,7 @@ jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
     Java_com_tzutalin_dlib_PeopleDet_##METHOD_NAME
 
 void JNIEXPORT
-    DLIB_JNI_METHOD(jniNativeClassInit)(JNIEnv* _env,
-                                                                jclass _this)
+    DLIB_JNI_METHOD(jniNativeClassInit)(JNIEnv* _env, jclass _this)
 {
     jclass detRetClass = _env->FindClass("com/tzutalin/dlib/VisionDetRet");
     gVisionDetRetOffsets.label = _env->GetFieldID(detRetClass, "mLabel",
@@ -251,14 +246,14 @@ void JNIEXPORT
     gVisionDetRetOffsets.top = _env->GetFieldID(detRetClass, "mTop", "I");
     gVisionDetRetOffsets.right = _env->GetFieldID(detRetClass, "mRight", "I");
     gVisionDetRetOffsets.bottom = _env->GetFieldID(detRetClass, "mBottom", "I");
-    LOGD("JniNativeClassIni Success");
+    LOG(INFO) << "JniNativeClassIni Success";
 }
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniOpencvHOGDetect)(
         JNIEnv* env, jobject thiz, jstring imgPath)
 {
-    LOGD("com_tzutalin_dlib_PeopleDet jniOpencvHOGDetect");
+    LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniOpencvHOGDetect";
     const char* img_path = env->GetStringUTFChars(imgPath, 0);
     if (mOpencvHOGDetctor == NULL)
         mOpencvHOGDetctor = new OpencvHOGDetctor();
@@ -272,7 +267,8 @@ jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetOpecvHOGRet)(
             JNIEnv* env, jobject thiz, jobject detRet, jint index)
 {
-    if (mOpencvHOGDetctor) {
+    if (mOpencvHOGDetctor)
+    {
         cv::Rect rect = mOpencvHOGDetctor->getResult()[index];
         env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.x);
         env->SetIntField(detRet, gVisionDetRetOffsets.top, rect.y);
@@ -283,6 +279,7 @@ jint JNIEXPORT JNICALL
         env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
         return 0;
     }
+
     return -1;
 }
 
@@ -290,7 +287,7 @@ jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniDLibHOGDetect)(
         JNIEnv* env, jobject thiz, jstring imgPath, jobject detRet)
 {
-    LOGD("com_tzutalin_dlib_PeopleDet jniDLibHOGDetect");
+    LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniDLibHOGDetect";
     const char* img_path = env->GetStringUTFChars(imgPath, 0);
     if (mDLibDetector == NULL)
         mDLibDetector = new DLibHOGFaceDetector();
@@ -304,7 +301,8 @@ jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetDLibRet)(
             JNIEnv* env, jobject thiz, jobject detRet, jint index)
 {
-    if (mDLibDetector) {
+    if (mDLibDetector)
+    {
         dlib::rectangle rect = mDLibDetector->getResult()[index];
         env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.left());
         env->SetIntField(detRet, gVisionDetRetOffsets.top, rect.top());
@@ -315,6 +313,7 @@ jint JNIEXPORT JNICALL
         env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
         return 0;
     }
+
     return -1;
 }
 
@@ -365,11 +364,14 @@ int main()
     int im_size_max = MAX(img_width, img_height);
 
     float scale = float(INPUT_IMG_MIN_SIZE) / float(im_size_min);
-    if (scale * im_size_max > INPUT_IMG_MAX_SIZE) {
+
+    if (scale * im_size_max > INPUT_IMG_MAX_SIZE)
+    {
         scale = (float)INPUT_IMG_MAX_SIZE / (float)im_size_max;
     }
 
-    if (scale != 1.0) {
+    if (scale != 1.0)
+    {
         cv::Mat outputMat;
         cv::resize(src_img, outputMat, cv::Size(img_width * scale, img_height * scale));
         src_img = outputMat;
@@ -383,7 +385,8 @@ int main()
     std::cout << "size: " << dets.size() << std::endl;
 
     int i = 0;
-    for (i = 0; i < dets.size(); i++) {
+    for (i = 0; i < dets.size(); i++)
+    {
         dlib::rectangle dlibrect = dets[i];
         cv::Rect r(dlibrect.left(), dlibrect.top(), dlibrect.width(),
                    dlibrect.height());
