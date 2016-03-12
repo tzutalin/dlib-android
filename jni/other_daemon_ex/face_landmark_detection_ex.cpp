@@ -52,9 +52,9 @@ int main(int argc, char** argv)
         std::vector<full_object_detection> shapes;
         for (unsigned long j = 0; j < dets.size(); ++j)
         {
-            int64 t0 = cv::getTickCount();
+            long t0 = cv::getTickCount();
             full_object_detection shape = sp(img, dets[j]);
-            int64 t1 = cv::getTickCount();
+            long t1 = cv::getTickCount();
             double secs = (t1-t0)/cv::getTickFrequency();
             cout << "take " << secs << " seconds "<< endl;
             cout << "number of parts: "<< shape.num_parts() << endl;
