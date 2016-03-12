@@ -6,9 +6,9 @@ include $(CLEAR_VARS)
 # Define 3rd party path
 TOP_LEVEL_PATH = $(LOCAL_PATH)/..
 $(info TOP_LEVEL_PATH: $(TOP_LEVEL_PATH))
-	THIRD_PARTY_PATH = $(LOCAL_PATH)/../../third_party
-	OPENCV_PATH = $(THIRD_PARTY_PATH)/opencv
-	MINI_GLOG_PATH = $(THIRD_PARTY_PATH)/miniglog
+THIRD_PARTY_PATH = $(LOCAL_PATH)/../../third_party
+OPENCV_PATH = $(THIRD_PARTY_PATH)/opencv
+MINI_GLOG_PATH = $(THIRD_PARTY_PATH)/miniglog
 
 OpenCV_INSTALL_MODULES := on
 OPENCV_CAMERA_MODULES := off
@@ -23,7 +23,7 @@ LOCAL_C_INCLUDES :=  \
 	$(LOCAL_PATH)/../dlib
 
 LOCAL_SRC_FILES := \
-	../../$(MINI_GLOG_PATH)/glog/logging.cc \
+	../../third_party/miniglog/glog/logging.cc \
 	../dlib//dlib/threads/threads_kernel_shared.cpp \
 	../dlib/dlib/entropy_decoder/entropy_decoder_kernel_2.cpp \
 	../dlib/dlib/base64/base64_kernel_1.cpp \

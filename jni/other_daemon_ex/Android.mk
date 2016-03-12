@@ -24,7 +24,6 @@ LOCAL_C_INCLUDES :=  \
     $(LOCAL_PATH)/../dlib \
     $(LOCAL_PATH)/../dlib/all/source.cpp
 
-
 LOCAL_SRC_FILES := TestSelectiveSearch.cpp
 
 LOCAL_LDLIBS := -lm -llog -ldl -lz
