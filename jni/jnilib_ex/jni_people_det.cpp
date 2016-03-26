@@ -1,29 +1,26 @@
 /*
- * people_det.cpp
+ * jni_people_det.cpp
  *
  *  Created on: Oct 20, 2015
  *      Author: Tzutalin
  */
 
-#include <string.h>
-#include <jni.h>
-#include <android/log.h>
-#include <string>
-#include <stdio.h>
-#include <vector>
-#include <opencv2/opencv.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-
-#include <dlib/image_processing/frontal_face_detector.h>
-#include <dlib/image_processing/render_face_detections.h>
-#include <dlib/opencv/cv_image.h>
 #include <dlib/image_loader/load_image.h>
 #include <dlib/image_processing.h>
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/image_processing/render_face_detections.h>
 #include <dlib/opencv.h>
-
+#include <dlib/opencv/cv_image.h>
 #include <glog/logging.h>
+#include <jni.h>
+#include <memory>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 class OpencvHOGDetctor {
 public:
