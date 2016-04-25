@@ -1,0 +1,14 @@
+before_install:
+  - date
+  - ./travis-ci/setup.sh
+  - export PATH=`pwd`/android-ndk:`pwd`/android-sdk-linux/tools:`pwd`/android-sdk-linux/platform-tools:$PATH
+  - echo $PATH
+  - cd $HOME
+  - export PATH=$HOME/.cabal/bin:$PATH
+  - git clone --recursive https://github.com/tzutalin/dlib-android.git
+  - cd $TRAVIS_BUILD_DIR
+script:
+  - cd $TRAVIS_BUILD_DIR
+  - ndk-build -j8
+after_script:
+  - date

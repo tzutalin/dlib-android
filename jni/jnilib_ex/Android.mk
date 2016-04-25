@@ -31,8 +31,7 @@ LOCAL_SRC_FILES := \
 	../dlib/dlib/threads/threads_kernel_2.cpp
 
 LOCAL_SRC_FILES += \
-	       jni_people_det.cpp \
-               jni_face_landmark.cpp
+	       jni_people_det.cpp
 
 LOCAL_LDLIBS := -lm -llog -ldl -lz -ljnigraphics
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11

@@ -300,14 +300,17 @@ jint JNIEXPORT JNICALL
     env->SetIntField(detRet, gVisionDetRetOffsets.right, rect.right());
     env->SetIntField(detRet, gVisionDetRetOffsets.bottom, rect.bottom());
     env->SetFloatField(detRet, gVisionDetRetOffsets.confidence, 0);
-		// TODO: Revert it
-    //jstring jstr = (jstring)(env->NewStringUTF("face"));
-    //env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
+    jstring jstr = (jstring)(env->NewStringUTF("face"));
+    env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
 
 		std::unordered_map<int, dlib::full_object_detection>& faceShapeMap = gDLibHOGFaceDetector->getFaceShapeMap();
 		if (faceShapeMap.find(index) != faceShapeMap.end()) {
 			dlib::full_object_detection shape = faceShapeMap[index];
 			std::stringstream ss;
+			// If landmarks exists, set label as "face_landmarks "
+			if (shape.num_parts() > 0) {
+				ss << "face_landmarks ";
+			}
 		  for (int i = 0 ; i != shape.num_parts(); i++) {
 			  int x = shape.part(i).x();
 			  int y = shape.part(i).y();
