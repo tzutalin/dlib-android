@@ -28,35 +28,36 @@
 
 * [Optional] You can download a specific Android-OpenCV from http://opencv.org/downloads.html.  Download the version and copy the folders in native SDK to dlib-android/third_party/opencv. (Currently, itis 3.1)
 
-* Prepare a Android device for test
+* Prepare an Android device for test
 
 ### Build and Run
-You can change the compiler architecture in dlib-android/jni/Application.mk
+* You can change the compiler architecture in dlib-android/jni/Application.mk
 
-Build executable files and shared library, and push the executable files to Android devices. 
-```sh
-    $ cd [$dlib-android]
-    
-    Run all test daemons on your arm/x86 devices. Remember to connect to Android device
-    $ python build_push.py --test true
-    
-    Copy the shared lib to your Android project
-    $ python build_push.py --android_project dlib-android-app/dlib/src/main/jniLibs/
-```
+* Curretnly, it will build executable files like svm_ex, Selective search example, and JNI shared library
+
+
+Push the executable files to Android devices and run all test daemons on your devices. Remember to connect to Android device
+
+`$ cd [$dlib-android]`
+
+`$ python build_push.py --test true`
+
+If you want to use it for Android Java application and copy the shared lib to your Android project, please execute it
+ `$ python build_push.py --android_project dlib-android-app/dlib/src/main/jniLibs/`
+
 You can build only (Optional)
-
-	`$ ndk-build -j 2`
+`$ ndk-build -j 2`
 
 ### Write JNI and build shared library for Android Java application
-There are examples in [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
+* There are JNI examples in [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
 
-There is a sample app to demonstrate the result. [dlib-android-app](https://github.com/tzutalin/dlib-android-app)
+* There is a sample app to demonstrate the result. [dlib-android-app](https://github.com/tzutalin/dlib-android-app) demonstrates the library whose source is located under [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
 
 ### Do you want to contribute
  * If you have any improvement or you've found any bug, send a pull request with the code.
 
  * Give me a star on this repository
- 
 
 ### Future task
 * Add more examples to [dlib-anroid-app](https://github.com/tzutalin/dlib-android-app)
+

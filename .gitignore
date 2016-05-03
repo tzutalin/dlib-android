@@ -3,3 +3,4 @@ obj/
 !./jni/opencv/*
 *.bin
 /travis-ci/android-ndk
+libs/
