@@ -158,6 +158,32 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     return mRets.size();
   }
 
+ 
+//Bitmap face detection
+//You can use Mat as input
+//Author:zhao
+//Date:2016/5/10
+   virtual inline int det(cv::Mat image){
+   	LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
+	dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
+	cv::cvtColor(image,image,CV_RGBA2RGB);//import!Bitmap is RGBA,we need RGB here!
+	dlib::cv_image<dlib::bgr_pixel> img(image);
+	mRets = detector(img);
+	LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
+	mFaceShapeMap.clear();
+
+	    if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
+	       for (unsigned long j = 0; j < mRets.size(); ++j) {
+	         dlib::full_object_detection shape = msp(img, mRets[j]);
+	         LOG(INFO) << "face index:" << j << "number of parts: " << shape.num_parts();
+	         mFaceShapeMap[j] = shape;
+	       }
+	    }
+
+	    return mRets.size();
+  }
+
+
   std::unordered_map<int, dlib::full_object_detection>& getFaceShapeMap() {
 		return mFaceShapeMap;
 	}
@@ -289,6 +315,37 @@ jint JNIEXPORT JNICALL
   env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
   return size;
 }
+
+//Bitmap face detection
+//get jintArray from java.You need to change bitmap into java in android
+//You can refer  https://github.com/flyingzhao/FacialLandmarkAndroid/blob/master/src/com/tzutalin/dlib/PeopleDet.java 
+//to get how to write in java
+//Author:zhao
+//Date:2016/5/10
+JNIEXPORT jint JNICALL DLIB_JNI_METHOD(jniBitmapFaceDect)
+  (JNIEnv *env, jobject thiz, jintArray img,jint w,jint h, jstring landmarkPath){
+	LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniBitmapFaceDect";
+	jint *cbuf;
+	cbuf = env->GetIntArrayElements(img, JNI_FALSE );
+	if (cbuf == NULL) {
+	      return 0;
+	    }
+
+	cv::Mat imgData(h, w, CV_8UC4, (unsigned char *) cbuf);
+	const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
+	LOG(INFO) << "new DLibHOGFaceDetector";
+	if (gDLibHOGFaceDetector == NULL){
+	LOG(INFO) << landmarkmodel_path;
+	    	gDLibHOGFaceDetector = new DLibHOGFaceDetector(landmarkmodel_path);
+	}
+	jint size=gDLibHOGFaceDetector->det(imgData);
+	LOG(INFO) << "com_tzutalin_dlib_PeopleDet start det face"+size;
+	env->ReleaseIntArrayElements(img,cbuf,0);
+	env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
+	return size;
+}
+
+
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetDLibHOGFaceRet)(JNIEnv* env, jobject thiz,
