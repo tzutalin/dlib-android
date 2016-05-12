@@ -26,9 +26,11 @@
 
 * Install Android Debug Bride (ADB). You can download it via [Android SDK Manager](https://developer.android.com/sdk/installing/index.html) or $ sudo apt-get install android-tools-adb
 
+* Prepare an Android device for test
+
 * [Optional] You can download a specific Android-OpenCV from http://opencv.org/downloads.html.  Download the version and copy the folders in native SDK to dlib-android/third_party/opencv. (Currently, itis 3.1)
 
-* Prepare an Android device for test
+* [Optional] You can use [NDK Download script](https://github.com/tzutalin/android-ndk-downloader) to specify the version of NDK to download
 
 ### Build and Run
 * You can change the compiler architecture in dlib-android/jni/Application.mk
