@@ -4,6 +4,7 @@ import sys
 import argparse
 from distutils.dir_util import copy_tree
 import subprocess
+from subprocess import check_output
 from subprocess import Popen, PIPE
 
 DEVICE_ABI = 'armeabi-v7a';
@@ -30,8 +31,12 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def build(jobs):
-    subprocess.call(['ndk-build', '-j', str(jobs)])
+def ndk_build(jobs):
+    try:
+        print check_output(['ndk-build', '-j', str(jobs)], shell=True)
+    except subprocess.CalledProcessError as grepexc:
+        print('\033[91m' + ' error ! ' + '\033[0m')
+        os.sys.exit(0)
 
 def ndk_clean():
     subprocess.call(['ndk-build', 'clean'])
@@ -104,7 +109,7 @@ if __name__ == '__main__':
     if args.clean:
         ndk_clean()
     else:
-        build(args.jobs)
+        ndk_build(args.jobs)
 
     if args.android_project:
         srcFolder = os.path.join('libs')
