@@ -4,7 +4,6 @@ import sys
 import argparse
 from distutils.dir_util import copy_tree
 import subprocess
-from subprocess import check_output
 from subprocess import Popen, PIPE
 
 DEVICE_ABI = 'armeabi-v7a';
@@ -33,7 +32,8 @@ def parse_args():
 
 def ndk_build(jobs):
     try:
-        print check_output(['ndk-build', '-j', str(jobs)], shell=True)
+        #subprocess.check_output(['ndk-build', 'NDK_LOG=1', 'NDK_DEBUG=1', 'V=1', '-j' + str(jobs)], shell=True)
+        subprocess.call(['ndk-build', 'NDK_LOG=1', 'NDK_DEBUG=1', 'V=1', '-j' + str(jobs)])
     except subprocess.CalledProcessError as grepexc:
         print('\033[91m' + ' error ! ' + '\033[0m')
         os.sys.exit(0)
