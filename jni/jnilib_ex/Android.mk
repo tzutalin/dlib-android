@@ -33,7 +33,7 @@ LOCAL_SRC_FILES := \
 LOCAL_SRC_FILES += \
 	       jni_people_det.cpp
 
-LOCAL_LDLIBS := -lm -llog -ldl -lz -ljnigraphics
+LOCAL_LDLIBS := -lm -llog -ldl -lz
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11
 
 LOCAL_ARM_MODE := arm

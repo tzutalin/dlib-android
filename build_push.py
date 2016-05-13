@@ -33,7 +33,7 @@ def parse_args():
 def build(jobs):
     subprocess.call(['ndk-build', '-j', str(jobs)])
 
-def clean():
+def ndk_clean():
     subprocess.call(['ndk-build', 'clean'])
 
 def setDeviceABI():
@@ -95,11 +95,14 @@ if __name__ == '__main__':
     ROOT = os.path.dirname(os.path.abspath(__file__))
     os.chdir(ROOT)
 
+    libs_dir = os.path.join(ROOT, 'libs')
+    obj_dir = os.path.join(ROOT, 'obj')
+
     setDeviceABI()
 
     args = parse_args()
     if args.clean:
-        clean()
+        ndk_clean()
     else:
         build(args.jobs)
 

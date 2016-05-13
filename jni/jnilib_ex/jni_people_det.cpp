@@ -125,7 +125,7 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
  private:
   std::string mLandMarkModel;
   dlib::shape_predictor msp;
-	std::unordered_map <int, dlib::full_object_detection> mFaceShapeMap;
+  std::unordered_map<int, dlib::full_object_detection> mFaceShapeMap;
 
  public:
   DLibHOGFaceDetector(std::string landmarkmodel = "")
@@ -141,16 +141,17 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
 
     cv::Mat src_img = cv::imread(path, 1);
-    dlib::cv_image<dlib::bgr_pixel> img(src_img);
+    dlib::cv_image < dlib::bgr_pixel > img(src_img);
 
     mRets = detector(img);
     LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
 
-		mFaceShapeMap.clear();
+    mFaceShapeMap.clear();
     if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
       for (unsigned long j = 0; j < mRets.size(); ++j) {
         dlib::full_object_detection shape = msp(img, mRets[j]);
-        LOG(INFO) << "face index:" << j << "number of parts: " << shape.num_parts();
+        LOG(INFO) << "face index:" << j << "number of parts: "
+            << shape.num_parts();
         mFaceShapeMap[j] = shape;
       }
     }
@@ -158,35 +159,34 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     return mRets.size();
   }
 
- 
-//Bitmap face detection
-//You can use Mat as input
-//Author:zhao
-//Date:2016/5/10
-   virtual inline int det(cv::Mat image){
-   	LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
-	dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
-	cv::cvtColor(image,image,CV_RGBA2RGB);//import!Bitmap is RGBA,we need RGB here!
-	dlib::cv_image<dlib::bgr_pixel> img(image);
-	mRets = detector(img);
-	LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
-	mFaceShapeMap.clear();
+  //Bitmap face detection
+  //You can use Mat as input
+  //Author:zhao
+  //Date:2016/5/10
+  virtual inline int det(cv::Mat image) {
+    LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
+    dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
+    cv::cvtColor(image, image, CV_RGBA2RGB);  //import!Bitmap is RGBA,we need RGB here!
+    dlib::cv_image < dlib::bgr_pixel > img(image);
+    mRets = detector(img);
+    LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
+    mFaceShapeMap.clear();
 
-	    if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
-	       for (unsigned long j = 0; j < mRets.size(); ++j) {
-	         dlib::full_object_detection shape = msp(img, mRets[j]);
-	         LOG(INFO) << "face index:" << j << "number of parts: " << shape.num_parts();
-	         mFaceShapeMap[j] = shape;
-	       }
-	    }
+    if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
+      for (unsigned long j = 0; j < mRets.size(); ++j) {
+        dlib::full_object_detection shape = msp(img, mRets[j]);
+        LOG(INFO) << "face index:" << j << "number of parts: "
+            << shape.num_parts();
+        mFaceShapeMap[j] = shape;
+      }
+    }
 
-	    return mRets.size();
+    return mRets.size();
   }
 
-
   std::unordered_map<int, dlib::full_object_detection>& getFaceShapeMap() {
-		return mFaceShapeMap;
-	}
+    return mFaceShapeMap;
+  }
 };
 
 OpencvHOGDetctor* gOpencvHOGDetector = NULL;
@@ -339,13 +339,11 @@ JNIEXPORT jint JNICALL DLIB_JNI_METHOD(jniBitmapFaceDect)
 	    	gDLibHOGFaceDetector = new DLibHOGFaceDetector(landmarkmodel_path);
 	}
 	jint size=gDLibHOGFaceDetector->det(imgData);
-	LOG(INFO) << "com_tzutalin_dlib_PeopleDet start det face"+size;
+	LOG(INFO) << "com_tzutalin_dlib_PeopleDet start det face: " << size;
 	env->ReleaseIntArrayElements(img,cbuf,0);
 	env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
 	return size;
 }
-
-
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetDLibHOGFaceRet)(JNIEnv* env, jobject thiz,

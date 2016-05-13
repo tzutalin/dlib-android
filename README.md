@@ -37,17 +37,19 @@
 
 * Curretnly, it will build executable files like svm_ex, Selective search example, and JNI shared library
 
+* Push the executable files to Android devices and run all test daemons on your devices. Remember to connect to Android device
 
-Push the executable files to Android devices and run all test daemons on your devices. Remember to connect to Android device
+`$ cd [dlib-android]`
 
-`$ cd [$dlib-android]`
-
-`$ python build_push.py --test true`
+`$ python build_push.py --test`
 
 If you want to use it for Android Java application and copy the shared lib to your Android project, please execute it
  `$ python build_push.py --android_project dlib-android-app/dlib/src/main/jniLibs/`
 
-You can build only (Optional)
+* Alternative way to build:
+
+`$ cd [dlib-android]`
+
 `$ ndk-build -j 2`
 
 ### Write JNI and build shared library for Android Java application
