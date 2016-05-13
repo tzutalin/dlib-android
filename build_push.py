@@ -20,15 +20,12 @@ def parse_args():
                         help='Android JNI folder path',
                         default=None, type=str)
 
-    parser.add_argument('--clean', dest='clean',
-                        help='clean',
-                        default=False, type=bool)
-
-    parser.add_argument('--test', dest='test',
-                        help='Push TestSelectiveSearch sample to device to test',
-                        default=False, type=bool)
+    parser.add_argument('--clean', action='store_true',
+                        help='clean obj and binaries')
 
 
+    parser.add_argument('--test', action='store_true',
+                        help='Push executable file to data/local/tmp/, and run them')
 
     args = parser.parse_args()
     return args
@@ -94,12 +91,15 @@ def copytree(src, dst, symlinks=False, ignore=None):
             print 'Copy errors'
 
 if __name__ == '__main__':
+    # Move to top-level
+    ROOT = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(ROOT)
+
     setDeviceABI()
 
     args = parse_args()
-    if args.clean is True:
+    if args.clean:
         clean()
-        exit()
     else:
         build(args.jobs)
 
