@@ -63,5 +63,5 @@ If you want to use it for Android Java application and copy the shared lib to yo
  * Give me a star on this repository
 
 ### Future task
-* Add more examples to [dlib-anroid-app](https://github.com/tzutalin/dlib-android-app)
+* Add more examples to [dlib-android-app](https://github.com/tzutalin/dlib-android-app)
 
