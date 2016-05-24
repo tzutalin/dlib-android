@@ -6,9 +6,53 @@
  *
  *  Copyright (c) 2015 Tzutalin. All rights reserved.
  */
-
-#include "detector.h"
+#include <android/bitmap.h>
+#include <detector.h>
 #include <jni.h>
+
+using namespace cv;
+
+static void convertBitmapToRgbaMat(JNIEnv * env, jobject& bitmap, Mat& dst, bool needUnPremultiplyAlpha) {
+  AndroidBitmapInfo info;
+  void* pixels = 0;
+
+  try {
+    CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
+    CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 ||
+              info.format == ANDROID_BITMAP_FORMAT_RGB_565);
+    CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
+    CV_Assert(pixels);
+    dst.create(info.height, info.width, CV_8UC4);
+    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
+      LOG(INFO) << "nBitmapToMat: RGBA_8888 -> CV_8UC4";
+      Mat tmp(info.height, info.width, CV_8UC4, pixels);
+      if (needUnPremultiplyAlpha)
+        cvtColor(tmp, dst, COLOR_mRGBA2RGBA);
+      else
+        tmp.copyTo(dst);
+    } else {
+      // info.format == ANDROID_BITMAP_FORMAT_RGB_565
+      LOG(INFO) << "nBitmapToMat: RGB_565 -> CV_8UC4";
+      Mat tmp(info.height, info.width, CV_8UC2, pixels);
+      cvtColor(tmp, dst, COLOR_BGR5652RGBA);
+    }
+    AndroidBitmap_unlockPixels(env, bitmap);
+    return;
+  } catch (const cv::Exception& e) {
+    AndroidBitmap_unlockPixels(env, bitmap);
+    LOG(FATAL) << "nBitmapToMat catched cv::Exception:" << e.what();
+    jclass je = env->FindClass("org/opencv/core/CvException");
+    if (!je) je = env->FindClass("java/lang/Exception");
+    env->ThrowNew(je, e.what());
+    return;
+  } catch (...) {
+    AndroidBitmap_unlockPixels(env, bitmap);
+    LOG(FATAL) << "nBitmapToMat catched unknown exception (...)";
+    jclass je = env->FindClass("java/lang/Exception");
+    env->ThrowNew(je, "Unknown exception in JNI code {nBitmapToMat}");
+    return;
+  }
+}
 
 std::shared_ptr<OpencvHOGDetctor> gOpencvHOGDetectorPtr;
 std::shared_ptr<DLibHOGDetector> gDLibHOGDetectorPtr;
@@ -127,7 +171,7 @@ jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniDLibHOGFaceDetect)(JNIEnv* env, jobject thiz,
 					  jstring imgPath,
 					  jstring landmarkPath) {
-  LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniDLibHOGFaceDetect";
+  LOG(INFO) << "jniDLibHOGFaceDetect";
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
   const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
 
@@ -141,30 +185,23 @@ jint JNIEXPORT JNICALL
 }
 
 //Bitmap face detection
-//get jintArray from java.You need to change bitmap into java in android
-//You can refer  https://github.com/flyingzhao/FacialLandmarkAndroid/blob/master/src/com/tzutalin/dlib/PeopleDet.java 
-//to get how to write in java
 //Author:zhao
 //Date:2016/5/10
 JNIEXPORT jint JNICALL DLIB_JNI_METHOD(jniBitmapFaceDect)
-  (JNIEnv *env, jobject thiz, jintArray img,jint w,jint h, jstring landmarkPath){
-	LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniBitmapFaceDect";
-	jint *cbuf;
-	cbuf = env->GetIntArrayElements(img, JNI_FALSE );
-	if (cbuf == NULL) {
-	      return 0;
-	}
-
-	cv::Mat imgData(h, w, CV_8UC4, (unsigned char *) cbuf);
+  (JNIEnv *env, jobject thiz, jobject bitmap, jstring landmarkPath){
+	LOG(INFO) << "jniBitmapFaceDect";
+	cv::Mat rgbaMat;
+	cv::Mat brgMat;
+  convertBitmapToRgbaMat(env, bitmap, rgbaMat, true);
+  cv::cvtColor(rgbaMat, brgMat, cv::COLOR_RGBA2BGR);
 	const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
 	if (!gDLibHOGFaceDetectorPtr){
       LOG(INFO) << "new DLibHOGFaceDetector, landmarkPath" << landmarkmodel_path;
       gDLibHOGFaceDetectorPtr = std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
 	}
-
-	jint size=gDLibHOGFaceDetectorPtr->det(imgData);
-	LOG(INFO) << "com_tzutalin_dlib_PeopleDet start det face: " << size;
-	env->ReleaseIntArrayElements(img,cbuf,0);
+  //cv::imwrite("/sdcard/ret.jpg", rgbaMat);
+	jint size = gDLibHOGFaceDetectorPtr->det(brgMat);
+	LOG(INFO) << "det face size: " << size;
 	env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
 	return size;
 }

@@ -31,9 +31,12 @@ LOCAL_SRC_FILES := \
 	../dlib/dlib/threads/threads_kernel_2.cpp
 
 LOCAL_SRC_FILES += \
-	       jni_people_det.cpp
+	       jni_people_det.cpp \
+           imageutils_jni.cpp \
+           common/rgb2yuv.cpp \
+           common/yuv2rgb.cpp
 
-LOCAL_LDLIBS := -lm -llog -ldl -lz
+LOCAL_LDLIBS := -lm -llog -ldl -lz -ljnigraphics
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11
 
 LOCAL_ARM_MODE := arm

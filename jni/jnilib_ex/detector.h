@@ -1,3 +1,12 @@
+/*
+ * detector.h using google-style
+ *
+ *  Created on: May 24, 2016
+ *      Author: Tzutalin
+ *
+ *  Copyright (c) 2016 Tzutalin. All rights reserved.
+ */
+
 #pragma once
 
 #include <dlib/image_loader/load_image.h>
@@ -20,14 +29,12 @@
 
 class OpencvHOGDetctor {
  public:
-  OpencvHOGDetctor() {
-  }
+  OpencvHOGDetctor() {}
 
   inline int det(std::string path) {
     LOG(INFO) << "det path : " << path;
     cv::Mat src_img = cv::imread(path, 1);
-    if (src_img.empty())
-      return 0;
+    if (src_img.empty()) return 0;
 
     cv::HOGDescriptor hog;
     hog.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
@@ -38,10 +45,8 @@ class OpencvHOGDetctor {
     for (i = 0; i < found.size(); i++) {
       cv::Rect r = found[i];
       for (j = 0; j < found.size(); j++)
-        if (j != i && (r & found[j]) == r)
-          break;
-      if (j == found.size())
-        found_filtered.push_back(r);
+        if (j != i && (r & found[j]) == r) break;
+      if (j == found.size()) found_filtered.push_back(r);
     }
 
     for (i = 0; i < found_filtered.size(); i++) {
@@ -59,13 +64,9 @@ class OpencvHOGDetctor {
     return found_filtered.size();
   }
 
-  inline cv::Mat& getResultMat() {
-    return mResultMat;
-  }
+  inline cv::Mat& getResultMat() { return mResultMat; }
 
-  inline std::vector<cv::Rect>& getResult() {
-    return mRets;
-  }
+  inline std::vector<cv::Rect>& getResult() { return mRets; }
 
  private:
   cv::Mat mResultMat;
@@ -74,9 +75,10 @@ class OpencvHOGDetctor {
 
 class DLibHOGDetector {
  public:
+  // Default svm path is /sdcard/person.svm if it exists
   DLibHOGDetector(std::string modelPath = "/sdcard/person.svm")
       : mModelPath(modelPath) {
-    //LOG(INFO) << "Model Path: " << mModelPath;
+    // LOG(INFO) << "Model Path: " << mModelPath;
   }
 
   virtual inline int det(std::string path) {
@@ -93,7 +95,7 @@ class DLibHOGDetector {
 
     float scale = float(INPUT_IMG_MIN_SIZE) / float(im_size_min);
     if (scale * im_size_max > INPUT_IMG_MAX_SIZE) {
-      scale = (float) INPUT_IMG_MAX_SIZE / (float) im_size_max;
+      scale = (float)INPUT_IMG_MAX_SIZE / (float)im_size_max;
     }
 
     if (scale != 1.0) {
@@ -104,16 +106,14 @@ class DLibHOGDetector {
     }
 
     // cv::resize(src_img, src_img, cv::Size(320, 240));
-    dlib::cv_image < dlib::bgr_pixel > cimg(src_img);
+    dlib::cv_image<dlib::bgr_pixel> cimg(src_img);
 
     double thresh = 0.5;
     std::vector<dlib::rectangle> dets = detector(cimg, thresh);
     return 0;
   }
 
-  inline std::vector<dlib::rectangle> getResult() {
-    return mRets;
-  }
+  inline std::vector<dlib::rectangle> getResult() { return mRets; }
 
  protected:
   std::vector<dlib::rectangle> mRets;
@@ -145,7 +145,7 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
 
     cv::Mat src_img = cv::imread(path, 1);
-    dlib::cv_image < dlib::bgr_pixel > img(src_img);
+    dlib::cv_image<dlib::bgr_pixel> img(src_img);
 
     mRets = detector(img);
     LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
@@ -154,8 +154,8 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
       for (unsigned long j = 0; j < mRets.size(); ++j) {
         dlib::full_object_detection shape = msp(img, mRets[j]);
-        LOG(INFO) << "face index:" << j << "number of parts: "
-            << shape.num_parts();
+        LOG(INFO) << "face index:" << j
+                  << "number of parts: " << shape.num_parts();
         mFaceShapeMap[j] = shape;
       }
     }
@@ -163,15 +163,11 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     return mRets.size();
   }
 
-  //Bitmap face detection
-  //You can use Mat as input
-  //Author:zhao
-  //Date:2016/5/10
-  virtual inline int det(cv::Mat image) {
+  // The format of mat should be BGR
+  virtual inline int det(const cv::Mat& image) {
     LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
     dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
-    cv::cvtColor(image, image, CV_RGBA2RGB);  //import!Bitmap is RGBA,we need RGB here!
-    dlib::cv_image < dlib::bgr_pixel > img(image);
+    dlib::cv_image<dlib::bgr_pixel> img(image);
     mRets = detector(img);
     LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
     mFaceShapeMap.clear();
@@ -179,7 +175,8 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
       for (unsigned long j = 0; j < mRets.size(); ++j) {
         dlib::full_object_detection shape = msp(img, mRets[j]);
-        LOG(INFO) << "face index:" << j << "number of parts: " << shape.num_parts();
+        LOG(INFO) << "face index:" << j
+                  << "number of parts: " << shape.num_parts();
         mFaceShapeMap[j] = shape;
       }
     }
