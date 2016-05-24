@@ -7,191 +7,12 @@
  *  Copyright (c) 2015 Tzutalin. All rights reserved.
  */
 
-#include <dlib/image_loader/load_image.h>
-#include <dlib/image_processing.h>
-#include <dlib/image_processing/frontal_face_detector.h>
-#include <dlib/image_processing/render_face_detections.h>
-#include <dlib/opencv/cv_image.h>
-#include <dlib/image_loader/load_image.h>
-#include <glog/logging.h>
+#include "detector.h"
 #include <jni.h>
-#include <memory>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/opencv.hpp>
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
 
-class OpencvHOGDetctor {
- public:
-  OpencvHOGDetctor() {}
-
-  inline int det(std::string path) {
-    LOG(INFO) << "det path : " << path;
-    cv::Mat src_img = cv::imread(path, 1);
-    if (src_img.empty()) return 0;
-
-    cv::HOGDescriptor hog;
-    hog.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
-    std::vector<cv::Rect> found, found_filtered;
-    hog.detectMultiScale(src_img, found, 0, cv::Size(8, 8), cv::Size(32, 32),
-			 1.05, 2);
-    size_t i, j;
-    for (i = 0; i < found.size(); i++) {
-      cv::Rect r = found[i];
-      for (j = 0; j < found.size(); j++)
-        if (j != i && (r & found[j]) == r) break;
-        if (j == found.size()) found_filtered.push_back(r);
-    }
-
-    for (i = 0; i < found_filtered.size(); i++) {
-      cv::Rect r = found_filtered[i];
-      r.x += cvRound(r.width * 0.1);
-      r.width = cvRound(r.width * 0.8);
-      r.y += cvRound(r.height * 0.06);
-      r.height = cvRound(r.height * 0.9);
-      cv::rectangle(src_img, r.tl(), r.br(), cv::Scalar(0, 255, 0), 2);
-    }
-    mResultMat = src_img;
-    // cv::imwrite(path, mResultMat);
-    LOG(INFO) << "det ends";
-    mRets = found_filtered;
-    return found_filtered.size();
-  }
-
-  inline cv::Mat& getResultMat() { return mResultMat; }
-
-  inline std::vector<cv::Rect>& getResult() { return mRets; }
-
- private:
-  cv::Mat mResultMat;
-  std::vector<cv::Rect> mRets;
-};
-
-class DLibHOGDetector {
- public:
-  DLibHOGDetector(std::string modelPath = "/sdcard/person.svm")
-      : mModelPath(modelPath) {
-    LOG(INFO) << "Model Path: " << mModelPath;
-  }
-
-  virtual inline int det(std::string path) {
-    cv::Mat src_img = cv::imread(path, 1);
-
-    typedef dlib::scan_fhog_pyramid<dlib::pyramid_down<6> > image_scanner_type;
-    dlib::object_detector<image_scanner_type> detector;
-    dlib::deserialize(mModelPath) >> detector;
-
-    int img_width = src_img.cols;
-    int img_height = src_img.rows;
-    int im_size_min = MIN(img_width, img_height);
-    int im_size_max = MAX(img_width, img_height);
-
-    float scale = float(INPUT_IMG_MIN_SIZE) / float(im_size_min);
-    if (scale * im_size_max > INPUT_IMG_MAX_SIZE) {
-      scale = (float)INPUT_IMG_MAX_SIZE / (float)im_size_max;
-    }
-
-    if (scale != 1.0) {
-      cv::Mat outputMat;
-      cv::resize(src_img, outputMat, cv::Size(img_width * scale, img_height * scale));
-      src_img = outputMat;
-    }
-
-    // cv::resize(src_img, src_img, cv::Size(320, 240));
-    dlib::cv_image<dlib::bgr_pixel> cimg(src_img);
-
-    double thresh = 0.5;
-    std::vector<dlib::rectangle> dets = detector(cimg, thresh);
-    return 0;
-  }
-
-  inline std::vector<dlib::rectangle> getResult() { return mRets; }
-
- protected:
-  std::vector<dlib::rectangle> mRets;
-  std::string mModelPath;
-  const int INPUT_IMG_MAX_SIZE = 800;
-  const int INPUT_IMG_MIN_SIZE = 600;
-};
-
-/*
- * DLib face detect and face feature extractor
- */
-class DLibHOGFaceDetector : public DLibHOGDetector {
- private:
-  std::string mLandMarkModel;
-  dlib::shape_predictor msp;
-  std::unordered_map<int, dlib::full_object_detection> mFaceShapeMap;
-
- public:
-  DLibHOGFaceDetector(std::string landmarkmodel = "")
-      : mLandMarkModel(landmarkmodel) {
-    if (!mLandMarkModel.empty()) {
-      dlib::deserialize(mLandMarkModel) >> msp;
-      LOG(INFO) << "Load landmarkmodel from " << mLandMarkModel;
-    }
-  }
-
-  virtual inline int det(std::string path) {
-    LOG(INFO) << "Read path from " << path;
-    dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
-
-    cv::Mat src_img = cv::imread(path, 1);
-    dlib::cv_image < dlib::bgr_pixel > img(src_img);
-
-    mRets = detector(img);
-    LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
-
-    mFaceShapeMap.clear();
-    if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
-      for (unsigned long j = 0; j < mRets.size(); ++j) {
-        dlib::full_object_detection shape = msp(img, mRets[j]);
-        LOG(INFO) << "face index:" << j << "number of parts: "
-            << shape.num_parts();
-        mFaceShapeMap[j] = shape;
-      }
-    }
-
-    return mRets.size();
-  }
-
-  //Bitmap face detection
-  //You can use Mat as input
-  //Author:zhao
-  //Date:2016/5/10
-  virtual inline int det(cv::Mat image) {
-    LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
-    dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
-    cv::cvtColor(image, image, CV_RGBA2RGB);  //import!Bitmap is RGBA,we need RGB here!
-    dlib::cv_image < dlib::bgr_pixel > img(image);
-    mRets = detector(img);
-    LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
-    mFaceShapeMap.clear();
-
-    if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
-      for (unsigned long j = 0; j < mRets.size(); ++j) {
-        dlib::full_object_detection shape = msp(img, mRets[j]);
-        LOG(INFO) << "face index:" << j << "number of parts: "
-            << shape.num_parts();
-        mFaceShapeMap[j] = shape;
-      }
-    }
-
-    return mRets.size();
-  }
-
-  std::unordered_map<int, dlib::full_object_detection>& getFaceShapeMap() {
-    return mFaceShapeMap;
-  }
-};
-
-OpencvHOGDetctor* gOpencvHOGDetector = NULL;
-DLibHOGDetector* gDLibHOGDetector = NULL;
-DLibHOGFaceDetector* gDLibHOGFaceDetector = NULL;
+std::shared_ptr<OpencvHOGDetctor> gOpencvHOGDetectorPtr;
+std::shared_ptr<DLibHOGDetector> gDLibHOGDetectorPtr;
+std::shared_ptr<DLibHOGFaceDetector> gDLibHOGFaceDetectorPtr;
 
 #ifdef __cplusplus
 extern "C" {
@@ -243,8 +64,10 @@ jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniOpencvHOGDetect)(JNIEnv* env,
 							   jstring imgPath) {
   LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniOpencvHOGDetect";
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
-  if (gOpencvHOGDetector == NULL) gOpencvHOGDetector = new OpencvHOGDetctor();
-  int nums = gOpencvHOGDetector->det(std::string(img_path));
+  if (!gOpencvHOGDetectorPtr)
+    gOpencvHOGDetectorPtr = std::make_shared<OpencvHOGDetctor>();
+
+  int nums = gOpencvHOGDetectorPtr->det(std::string(img_path));
   env->ReleaseStringUTFChars(imgPath, img_path);
   return nums;
 }
@@ -252,8 +75,8 @@ jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniOpencvHOGDetect)(JNIEnv* env,
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetOpecvHOGRet)(JNIEnv* env, jobject thiz,
 				       jobject detRet, jint index) {
-  if (gOpencvHOGDetector) {
-    cv::Rect rect = gOpencvHOGDetector->getResult()[index];
+  if (gOpencvHOGDetectorPtr) {
+    cv::Rect rect = gOpencvHOGDetectorPtr->getResult()[index];
     env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.x);
     env->SetIntField(detRet, gVisionDetRetOffsets.top, rect.y);
     env->SetIntField(detRet, gVisionDetRetOffsets.right, rect.x + rect.width);
@@ -273,9 +96,10 @@ jint JNIEXPORT JNICALL
   LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniDLibHOGDetect";
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
   const char* model_path = env->GetStringUTFChars(imgPath, 0);
-  if (gDLibHOGDetector == NULL)
-    gDLibHOGDetector = new DLibHOGDetector(std::string(model_path));
-  int size = gDLibHOGDetector->det(std::string(img_path));
+  if (!gDLibHOGDetectorPtr)
+    gDLibHOGDetectorPtr = std::make_shared<DLibHOGDetector>(std::string(model_path));
+
+  int size = gDLibHOGDetectorPtr->det(std::string(img_path));
   env->ReleaseStringUTFChars(imgPath, img_path);
   env->ReleaseStringUTFChars(modelPath, model_path);
   return size;
@@ -284,8 +108,8 @@ jint JNIEXPORT JNICALL
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetDLibHOGRet)(JNIEnv* env, jobject thiz, jobject detRet,
 				      jint index) {
-  if (gDLibHOGDetector) {
-    dlib::rectangle rect = gDLibHOGDetector->getResult()[index];
+  if (gDLibHOGDetectorPtr) {
+    dlib::rectangle rect = gDLibHOGDetectorPtr->getResult()[index];
     env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.left());
     env->SetIntField(detRet, gVisionDetRetOffsets.top, rect.top());
     env->SetIntField(detRet, gVisionDetRetOffsets.right, rect.right());
@@ -307,10 +131,10 @@ jint JNIEXPORT JNICALL
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
   const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
 
-  if (gDLibHOGFaceDetector == NULL)
-    gDLibHOGFaceDetector = new DLibHOGFaceDetector(landmarkmodel_path);
-  int size = gDLibHOGFaceDetector->det(std::string(img_path));
+  if (!gDLibHOGFaceDetectorPtr)
+    gDLibHOGFaceDetectorPtr = std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
 
+  int size = gDLibHOGFaceDetectorPtr->det(std::string(img_path));
   env->ReleaseStringUTFChars(imgPath, img_path);
   env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
   return size;
@@ -329,16 +153,16 @@ JNIEXPORT jint JNICALL DLIB_JNI_METHOD(jniBitmapFaceDect)
 	cbuf = env->GetIntArrayElements(img, JNI_FALSE );
 	if (cbuf == NULL) {
 	      return 0;
-	    }
+	}
 
 	cv::Mat imgData(h, w, CV_8UC4, (unsigned char *) cbuf);
 	const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
-	LOG(INFO) << "new DLibHOGFaceDetector";
-	if (gDLibHOGFaceDetector == NULL){
-	LOG(INFO) << landmarkmodel_path;
-	    	gDLibHOGFaceDetector = new DLibHOGFaceDetector(landmarkmodel_path);
+	if (!gDLibHOGFaceDetectorPtr){
+      LOG(INFO) << "new DLibHOGFaceDetector, landmarkPath" << landmarkmodel_path;
+      gDLibHOGFaceDetectorPtr = std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
 	}
-	jint size=gDLibHOGFaceDetector->det(imgData);
+
+	jint size=gDLibHOGFaceDetectorPtr->det(imgData);
 	LOG(INFO) << "com_tzutalin_dlib_PeopleDet start det face: " << size;
 	env->ReleaseIntArrayElements(img,cbuf,0);
 	env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
@@ -348,8 +172,8 @@ JNIEXPORT jint JNICALL DLIB_JNI_METHOD(jniBitmapFaceDect)
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetDLibHOGFaceRet)(JNIEnv* env, jobject thiz,
 					  jobject detRet, jint index) {
-  if (gDLibHOGFaceDetector) {
-    dlib::rectangle rect = gDLibHOGFaceDetector->getResult()[index];
+  if (gDLibHOGFaceDetectorPtr) {
+    dlib::rectangle rect = gDLibHOGFaceDetectorPtr->getResult()[index];
     env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.left());
     env->SetIntField(detRet, gVisionDetRetOffsets.top, rect.top());
     env->SetIntField(detRet, gVisionDetRetOffsets.right, rect.right());
@@ -358,7 +182,7 @@ jint JNIEXPORT JNICALL
     jstring jstr = (jstring)(env->NewStringUTF("face"));
     env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
 
-		std::unordered_map<int, dlib::full_object_detection>& faceShapeMap = gDLibHOGFaceDetector->getFaceShapeMap();
+		std::unordered_map<int, dlib::full_object_detection>& faceShapeMap = gDLibHOGFaceDetectorPtr->getFaceShapeMap();
 		if (faceShapeMap.find(index) != faceShapeMap.end()) {
 			dlib::full_object_detection shape = faceShapeMap[index];
 			std::stringstream ss;
@@ -386,12 +210,10 @@ jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniInit)(JNIEnv* env, jobject thiz) {
 }
 
 jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniDeInit)(JNIEnv* env, jobject thiz) {
-  if (gDLibHOGDetector) delete gDLibHOGDetector;
-
-  if (gOpencvHOGDetector) delete gOpencvHOGDetector;
-
-  if (gDLibHOGFaceDetector) delete gDLibHOGFaceDetector;
-
+  LOG(INFO) << "jniDeInit";
+  gDLibHOGDetectorPtr.reset();
+  gOpencvHOGDetectorPtr.reset();
+  gDLibHOGFaceDetectorPtr.reset();
   return JNI_OK;
 }
 
