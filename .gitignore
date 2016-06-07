@@ -1,3 +1,5 @@
+third_party/OpenCV*
+third_party/opencv*
 *.swp
 obj/
 !./jni/opencv/*

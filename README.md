@@ -9,8 +9,9 @@
 
 ### Grab the source
 
-    $ cd ~
     $ git clone --recursive https://github.com/tzutalin/dlib-android.git
+    $ cd dlib-android
+    $ ./envsetup
 
 ### Prerequisites
 * Download Android-NDK from [Android website](https://developer.android.com/ndk/downloads/index.html).
