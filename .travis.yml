@@ -1,3 +1,15 @@
+language: android
+branches:
+  except:
+    - legacy
+    - experimental
+
+# whitelist
+branches:
+  only:
+    - master
+    - develop
+
 before_install:
   - date
   - cd $TRAVIS_BUILD_DIR
