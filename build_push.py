@@ -30,12 +30,10 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
 def ndk_build(jobs):
-    try:
-        # subprocess.call(['ndk-build', 'NDK_LOG=1', 'NDK_DEBUG=1', 'V=1', '-j' + str(jobs)])
-        print subprocess.check_output(['ndk-build', '-j4', 'NDK_LOG=1', 'NDK_DEBUG=1', 'V=1'], stderr=subprocess.STDOUT, universal_newlines=True)
-    except subprocess.CalledProcessError as grepexc:
-        print grepexc.output
+    ret = subprocess.call(['ndk-build', '-j4', 'NDK_LOG=1', 'NDK_DEBUG=1', 'V=0'])
+    if ret is not 0:
         print('\033[91m' + ' error ! ' + '\033[0m')
         os.sys.exit(0)
 
@@ -50,7 +48,6 @@ def setDeviceABI():
     if rc == 0:
         if "x86" in output:
             DEVICE_ABI = 'x86'
-
 
     print 'ABI:' + DEVICE_ABI
 

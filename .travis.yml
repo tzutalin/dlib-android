@@ -12,6 +12,7 @@ branches:
 
 before_install:
   - date
+  - ./envsetup 1> /dev/null 2%>1
   - cd $TRAVIS_BUILD_DIR
   - cd ./travis-ci
   - sh setupNDK.sh
