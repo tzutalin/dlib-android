@@ -1,5 +1,7 @@
 # dlib-android
 
+[![Build Status](https://travis-ci.org/tzutalin/dlib-android.png)](https://travis-ci.org/tzutalin/dlib-android)
+
 ### Purpose
 * Port [dlib](http://dlib.net/) to Andriod platform
 
