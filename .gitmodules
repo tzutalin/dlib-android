@@ -1,3 +1,6 @@
 [submodule "third_party/miniglog"]
 	path = third_party/miniglog
 	url = https://github.com/tzutalin/miniglog.git
+[submodule "jni/dlib"]
+	path = jni/dlib
+	url = https://github.com/davisking/dlib.git
