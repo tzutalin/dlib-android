@@ -8,13 +8,23 @@ from subprocess import Popen, PIPE
 
 DEVICE_ABI = 'armeabi-v7a';
 
+class PrintColors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def parse_args():
     """
     Parse input arguments
     """
     parser = argparse.ArgumentParser(description='Build dlib-android')
     parser.add_argument('--jobs', dest='jobs', help='Jobs to compile',
-                        default=1, type=int)
+                        default=4, type=int)
 
     parser.add_argument('--android_project', dest='android_project',
                         help='Android JNI folder path',
@@ -23,19 +33,29 @@ def parse_args():
     parser.add_argument('--clean', action='store_true',
                         help='clean obj and binaries')
 
-
     parser.add_argument('--test', action='store_true',
                         help='Push executable file to data/local/tmp/, and run them')
+
+    parser.add_argument('--debug', action='store_true',
+                        help='Enable debug build')
 
     args = parser.parse_args()
     return args
 
-
-def ndk_build(jobs):
-    ret = subprocess.call(['ndk-build', '-j4', 'NDK_LOG=1', 'NDK_DEBUG=1', 'V=0'])
+def ndk_build(args):
+    jobs = str(args.jobs)
+    isDebug = '1' if args.debug else '0'
+    build_cmd = ['ndk-build',
+               '-j' + jobs,
+               'NDK_LOG=1',
+               'NDK_DEBUG=' + isDebug,
+               'V=0']
+    # Print the build command
+    print PrintColors.UNDERLINE + 'ndk build arguments:' + str(build_cmd) + PrintColors.ENDC
+    ret = subprocess.call(build_cmd)
     if ret is not 0:
-        print('\033[91m' + ' error ! ' + '\033[0m')
-        os.sys.exit(0)
+        print PrintColors.FAIL + 'Build error' + PrintColors.ENDC
+        os.sys.exit(1)
 
 def ndk_clean():
     subprocess.call(['ndk-build', 'clean'])
@@ -49,7 +69,7 @@ def setDeviceABI():
         if "x86" in output:
             DEVICE_ABI = 'x86'
 
-    print 'ABI:' + DEVICE_ABI
+    print PrintColors.OKBLUE + 'We will use ABI:' + DEVICE_ABI + ' binaries to test ' + PrintColors.ENDC
 
 def test():
     global DEVICE_ABI
@@ -107,7 +127,7 @@ if __name__ == '__main__':
     if args.clean:
         ndk_clean()
     else:
-        ndk_build(args.jobs)
+        ndk_build(args)
 
     if args.android_project:
         srcFolder = os.path.join('libs')
@@ -116,3 +136,4 @@ if __name__ == '__main__':
     if args.test:
         test()
 
+    os.sys.exit(0)
