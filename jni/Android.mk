@@ -24,9 +24,6 @@ EXT_INSTALL_PATH = $(TOP_LEVEL_PATH)/third_party
 OPENCV_PATH = $(EXT_INSTALL_PATH)/opencv/jni
 OPENCV_INCLUDE_DIR = $(OPENCV_PATH)/include
 
-MINI_GLOG_PATH = $(EXT_INSTALL_PATH)/miniglog
-MINI_GLOG_INCLUDE_DIR = $(MINI_GLOG_PATH)
-
 ### Test daemon
 #==========================svm_ex===================================
 include $(CLEAR_VARS)
@@ -64,5 +61,8 @@ LOCAL_LDFLAGS += -pie -fPIE
 include $(BUILD_EXECUTABLE)
 #============================svr_ex================================
 
+MINIGLOG_LIB_TYPE := STATIC
+MINI_GLOG_PATH = $(EXT_INSTALL_PATH)/miniglog
+include $(MINI_GLOG_PATH)/Android.mk
 
 include $(SUB_MK_FILES)

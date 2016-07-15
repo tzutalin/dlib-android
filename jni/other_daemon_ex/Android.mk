@@ -51,9 +51,9 @@ LOCAL_SRC_FILES := face_landmark_detection_ex.cpp
 LOCAL_LDLIBS := -lm -llog -ldl -lz
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11
 
-LOCAL_ARM_MODE := arm
 ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)
-LOCAL_ARM_NEON := true
+    LOCAL_ARM_MODE := arm
+    LOCAL_ARM_NEON := true
 endif
 
 LOCAL_CFLAGS += -pie -fPIE

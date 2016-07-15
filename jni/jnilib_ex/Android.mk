@@ -7,17 +7,12 @@ OPENCV_CAMERA_MODULES := off
 OPENCV_LIB_TYPE := STATIC
 include $(OPENCV_PATH)/OpenCV.mk
 
-# import dlib
-LOCAL_STATIC_LIBRARIES += dlib
-
 LOCAL_MODULE := people_det
 
 LOCAL_C_INCLUDES +=  \
-           $(MINI_GLOG_INCLUDE_DIR) \
            $(OPENCV_INCLUDE_DIR)
 
 LOCAL_SRC_FILES += \
-           $(MINI_GLOG_PATH)/glog/logging.cc \
 	       jni_people_det.cpp \
            imageutils_jni.cpp \
            common/rgb2yuv.cpp \
@@ -25,6 +20,16 @@ LOCAL_SRC_FILES += \
 
 LOCAL_LDLIBS += -lm -llog -ldl -lz -ljnigraphics
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11
+
+# import dlib
+LOCAL_STATIC_LIBRARIES += dlib
+
+### import miniglog
+ifeq ($(MINIGLOG_LIB_TYPE),SHARED)
+    LOCAL_SHARED_LIBRARIES += miniglog
+else
+    LOCAL_STATIC_LIBRARIES += miniglog
+endif
 
 ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)
     LOCAL_ARM_MODE := arm
