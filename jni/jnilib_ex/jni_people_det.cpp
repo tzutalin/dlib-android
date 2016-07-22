@@ -12,6 +12,8 @@
 
 using namespace cv;
 
+namespace {
+
 static void convertBitmapToRgbaMat(JNIEnv * env, jobject& bitmap, Mat& dst, bool needUnPremultiplyAlpha) {
   AndroidBitmapInfo info;
   void* pixels = 0;
@@ -57,6 +59,7 @@ static void convertBitmapToRgbaMat(JNIEnv * env, jobject& bitmap, Mat& dst, bool
 std::shared_ptr<OpencvHOGDetctor> gOpencvHOGDetectorPtr;
 std::shared_ptr<DLibHOGDetector> gDLibHOGDetectorPtr;
 std::shared_ptr<DLibHOGFaceDetector> gDLibHOGFaceDetectorPtr;
+} // end unnamespace
 
 #ifdef __cplusplus
 extern "C" {

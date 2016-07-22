@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <common/fileutils.h>
 #include <dlib/image_loader/load_image.h>
 #include <dlib/image_processing.h>
 #include <dlib/image_processing/frontal_face_detector.h>
@@ -33,7 +34,7 @@ class OpencvHOGDetctor {
 
   inline int det(std::string path) {
     LOG(INFO) << "det path : " << path;
-    cv::Mat src_img = cv::imread(path, 1);
+    cv::Mat src_img = cv::imread(path, CV_LOAD_IMAGE_COLOR);
     if (src_img.empty()) return 0;
 
     cv::HOGDescriptor hog;
@@ -74,20 +75,34 @@ class OpencvHOGDetctor {
 };
 
 class DLibHOGDetector {
- public:
-  // Default svm path is /sdcard/person.svm if it exists
-  DLibHOGDetector(std::string modelPath = "/sdcard/person.svm")
-      : mModelPath(modelPath) {
-    // LOG(INFO) << "Model Path: " << mModelPath;
+ private:
+  typedef dlib::scan_fhog_pyramid<dlib::pyramid_down<6> > image_scanner_type;
+  dlib::object_detector<image_scanner_type> mObjectDetector;
+
+  inline void init() {
+    LOG(INFO) << "Model Path: " << mModelPath;
+    if (tzutalin::fileExists(mModelPath)) {
+      dlib::deserialize(mModelPath) >> mObjectDetector;
+    } else {
+      LOG(INFO) << "Not exist " << mModelPath;
+    }
   }
 
-  virtual inline int det(std::string path) {
-    cv::Mat src_img = cv::imread(path, 1);
+ public:
 
-    typedef dlib::scan_fhog_pyramid<dlib::pyramid_down<6> > image_scanner_type;
-    dlib::object_detector<image_scanner_type> detector;
-    dlib::deserialize(mModelPath) >> detector;
+  DLibHOGDetector(const std::string& modelPath = "/sdcard/person.svm")
+      : mModelPath(modelPath) {
+    init();
+  }
 
+  virtual inline int det(const std::string& path) {
+    using namespace tzutalin;
+    if (!fileExists(mModelPath) || !fileExists(path)) {
+      LOG(WARNING) << "No modle path or input file path";
+      return 0;
+    }
+    cv::Mat src_img = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    if (src_img.empty()) return 0;
     int img_width = src_img.cols;
     int img_height = src_img.rows;
     int im_size_min = MIN(img_width, img_height);
@@ -109,8 +124,8 @@ class DLibHOGDetector {
     dlib::cv_image<dlib::bgr_pixel> cimg(src_img);
 
     double thresh = 0.5;
-    std::vector<dlib::rectangle> dets = detector(cimg, thresh);
-    return 0;
+    mRets = mObjectDetector(cimg, thresh);
+    return mRets.size();
   }
 
   inline std::vector<dlib::rectangle> getResult() { return mRets; }
@@ -130,48 +145,47 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
   std::string mLandMarkModel;
   dlib::shape_predictor msp;
   std::unordered_map<int, dlib::full_object_detection> mFaceShapeMap;
+  dlib::frontal_face_detector mFaceDetector;
+
+  inline void init() {
+    LOG(INFO) << "Init mFaceDetector";
+    mFaceDetector = dlib::get_frontal_face_detector();
+  }
 
  public:
-  DLibHOGFaceDetector(std::string landmarkmodel = "")
+  DLibHOGFaceDetector() { init(); }
+
+  DLibHOGFaceDetector(const std::string& landmarkmodel)
       : mLandMarkModel(landmarkmodel) {
-    if (!mLandMarkModel.empty()) {
+    init();
+    if (!mLandMarkModel.empty() && tzutalin::fileExists(mLandMarkModel)) {
       dlib::deserialize(mLandMarkModel) >> msp;
       LOG(INFO) << "Load landmarkmodel from " << mLandMarkModel;
     }
   }
 
-  virtual inline int det(std::string path) {
+  virtual inline int det(const std::string& path) {
     LOG(INFO) << "Read path from " << path;
-    dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
-
-    cv::Mat src_img = cv::imread(path, 1);
-    dlib::cv_image<dlib::bgr_pixel> img(src_img);
-
-    mRets = detector(img);
-    LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
-
-    mFaceShapeMap.clear();
-    if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
-      for (unsigned long j = 0; j < mRets.size(); ++j) {
-        dlib::full_object_detection shape = msp(img, mRets[j]);
-        LOG(INFO) << "face index:" << j
-                  << "number of parts: " << shape.num_parts();
-        mFaceShapeMap[j] = shape;
-      }
-    }
-
-    return mRets.size();
+    cv::Mat src_img = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+    return det(src_img);
   }
 
   // The format of mat should be BGR
   virtual inline int det(const cv::Mat& image) {
+    if (image.empty()) return 0;
     LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
-    dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
+    if (image.channels() == 4) {
+      cv::cvtColor(image, image, CV_BGRA2BGR);
+    } else if (image.channels() == 1) {
+      cv::cvtColor(image, image, CV_GRAY2BGR);
+    }
+    // TODO : Convert to gray image to speed up detection
+    // It's unnecessary to use color image for face/landmark detection
     dlib::cv_image<dlib::bgr_pixel> img(image);
-    mRets = detector(img);
+    mRets = mFaceDetector(img);
     LOG(INFO) << "Dlib HOG face det size : " << mRets.size();
     mFaceShapeMap.clear();
-
+    // Process shape
     if (mRets.size() != 0 && mLandMarkModel.empty() == false) {
       for (unsigned long j = 0; j < mRets.size(); ++j) {
         dlib::full_object_detection shape = msp(img, mRets[j]);
@@ -180,7 +194,6 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
         mFaceShapeMap[j] = shape;
       }
     }
-
     return mRets.size();
   }
 
