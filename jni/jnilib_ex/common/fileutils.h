@@ -18,7 +18,7 @@
  *
  * Copyright (c) 2016 Tzutalin. All rights reserved.
  */
-namespace tzutalin {
+namespace jnicommon {
 
 bool fileExists(const char *name) {
   std::ifstream ifs(name);
@@ -39,5 +39,5 @@ bool dirExists(const std::string& name) {
   return dirExists(name.c_str());
 }
 
-}
+} // end jnicommon
 #endif /* FILEUTILS_H */

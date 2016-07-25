@@ -10,6 +10,8 @@
 #pragma once
 #include <common/types.h>
 
+namespace jnicommon {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -40,4 +42,5 @@ void ConvertYUV420SPToRGB565(const uint8* const input, uint16* const output,
 
 #ifdef __cplusplus
 }
+} //end jnicommon
 #endif

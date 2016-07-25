@@ -8,6 +8,8 @@
  */
 #include <common/yuv2rgb.h>
 
+namespace jnicommon {
+
 #ifndef MAX
 #define MAX(a, b)           \
   ({                        \
@@ -187,4 +189,5 @@ void ConvertYUV420SPToRGB565(const uint8* const input, uint16* const output,
       *out++ = (nR << 11) | (nG << 5) | nB;
     }
   }
+}
 }

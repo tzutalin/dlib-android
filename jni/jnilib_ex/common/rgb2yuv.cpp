@@ -9,6 +9,8 @@
 
 #include <common/rgb2yuv.h>
 
+namespace jnicommon {
+
 static inline void WriteYUV(const int x, const int y, const int width,
                             const int r8, const int g8, const int b8,
                             uint8* const pY, uint8* const pUV) {
@@ -88,4 +90,5 @@ void ConvertRGB565ToYUV420SP(const uint16* const input, uint8* const output,
       WriteYUV(x, y, width, r8, g8, b8, pY++, pUV);
     }
   }
+}
 }

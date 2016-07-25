@@ -81,7 +81,7 @@ class DLibHOGDetector {
 
   inline void init() {
     LOG(INFO) << "Model Path: " << mModelPath;
-    if (tzutalin::fileExists(mModelPath)) {
+    if (jnicommon::fileExists(mModelPath)) {
       dlib::deserialize(mModelPath) >> mObjectDetector;
     } else {
       LOG(INFO) << "Not exist " << mModelPath;
@@ -96,7 +96,7 @@ class DLibHOGDetector {
   }
 
   virtual inline int det(const std::string& path) {
-    using namespace tzutalin;
+    using namespace jnicommon;
     if (!fileExists(mModelPath) || !fileExists(path)) {
       LOG(WARNING) << "No modle path or input file path";
       return 0;
@@ -158,7 +158,7 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
   DLibHOGFaceDetector(const std::string& landmarkmodel)
       : mLandMarkModel(landmarkmodel) {
     init();
-    if (!mLandMarkModel.empty() && tzutalin::fileExists(mLandMarkModel)) {
+    if (!mLandMarkModel.empty() && jnicommon::fileExists(mLandMarkModel)) {
       dlib::deserialize(mLandMarkModel) >> msp;
       LOG(INFO) << "Load landmarkmodel from " << mLandMarkModel;
     }

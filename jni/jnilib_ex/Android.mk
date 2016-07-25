@@ -16,7 +16,8 @@ LOCAL_SRC_FILES += \
 	       jni_people_det.cpp \
            imageutils_jni.cpp \
            common/rgb2yuv.cpp \
-           common/yuv2rgb.cpp
+           common/yuv2rgb.cpp \
+           common/bitmap2mat.cpp
 
 LOCAL_LDLIBS += -lm -llog -ldl -lz -ljnigraphics
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11

@@ -7,59 +7,17 @@
  *  Copyright (c) 2015 Tzutalin. All rights reserved.
  */
 #include <android/bitmap.h>
+#include <common/bitmap2mat.h>
 #include <detector.h>
 #include <jni.h>
 
 using namespace cv;
 
 namespace {
-
-static void convertBitmapToRgbaMat(JNIEnv * env, jobject& bitmap, Mat& dst, bool needUnPremultiplyAlpha) {
-  AndroidBitmapInfo info;
-  void* pixels = 0;
-
-  try {
-    CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
-    CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 ||
-              info.format == ANDROID_BITMAP_FORMAT_RGB_565);
-    CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
-    CV_Assert(pixels);
-    dst.create(info.height, info.width, CV_8UC4);
-    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
-      LOG(INFO) << "nBitmapToMat: RGBA_8888 -> CV_8UC4";
-      Mat tmp(info.height, info.width, CV_8UC4, pixels);
-      if (needUnPremultiplyAlpha)
-        cvtColor(tmp, dst, COLOR_mRGBA2RGBA);
-      else
-        tmp.copyTo(dst);
-    } else {
-      // info.format == ANDROID_BITMAP_FORMAT_RGB_565
-      LOG(INFO) << "nBitmapToMat: RGB_565 -> CV_8UC4";
-      Mat tmp(info.height, info.width, CV_8UC2, pixels);
-      cvtColor(tmp, dst, COLOR_BGR5652RGBA);
-    }
-    AndroidBitmap_unlockPixels(env, bitmap);
-    return;
-  } catch (const cv::Exception& e) {
-    AndroidBitmap_unlockPixels(env, bitmap);
-    LOG(FATAL) << "nBitmapToMat catched cv::Exception:" << e.what();
-    jclass je = env->FindClass("org/opencv/core/CvException");
-    if (!je) je = env->FindClass("java/lang/Exception");
-    env->ThrowNew(je, e.what());
-    return;
-  } catch (...) {
-    AndroidBitmap_unlockPixels(env, bitmap);
-    LOG(FATAL) << "nBitmapToMat catched unknown exception (...)";
-    jclass je = env->FindClass("java/lang/Exception");
-    env->ThrowNew(je, "Unknown exception in JNI code {nBitmapToMat}");
-    return;
-  }
-}
-
 std::shared_ptr<OpencvHOGDetctor> gOpencvHOGDetectorPtr;
 std::shared_ptr<DLibHOGDetector> gDLibHOGDetectorPtr;
 std::shared_ptr<DLibHOGFaceDetector> gDLibHOGFaceDetectorPtr;
-} // end unnamespace
+}  // end unnamespace
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +30,7 @@ struct VisionDetRetOffsets {
   jfieldID top;
   jfieldID right;
   jfieldID bottom;
+  jmethodID addLandmark;
 } gVisionDetRetOffsets;
 
 // ========================================================
@@ -93,22 +52,28 @@ jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 #define DLIB_JNI_METHOD(METHOD_NAME) \
   Java_com_tzutalin_dlib_PeopleDet_##METHOD_NAME
 
-void JNIEXPORT DLIB_JNI_METHOD(jniNativeClassInit)(JNIEnv* _env, jclass _this) {
-  jclass detRetClass = _env->FindClass("com/tzutalin/dlib/VisionDetRet");
+void JNIEXPORT DLIB_JNI_METHOD(jniNativeClassInit)(JNIEnv* env, jclass _this) {
+  jclass detRetClass = env->FindClass("com/tzutalin/dlib/VisionDetRet");
+  CHECK_NOTNULL(detRetClass);
   gVisionDetRetOffsets.label =
-      _env->GetFieldID(detRetClass, "mLabel", "java/lang/String");
+      env->GetFieldID(detRetClass, "mLabel", "java/lang/String");
   gVisionDetRetOffsets.confidence =
-      _env->GetFieldID(detRetClass, "mConfidence", "F");
-  gVisionDetRetOffsets.left = _env->GetFieldID(detRetClass, "mLeft", "I");
-  gVisionDetRetOffsets.top = _env->GetFieldID(detRetClass, "mTop", "I");
-  gVisionDetRetOffsets.right = _env->GetFieldID(detRetClass, "mRight", "I");
-  gVisionDetRetOffsets.bottom = _env->GetFieldID(detRetClass, "mBottom", "I");
+      env->GetFieldID(detRetClass, "mConfidence", "F");
+  gVisionDetRetOffsets.left = env->GetFieldID(detRetClass, "mLeft", "I");
+  gVisionDetRetOffsets.top = env->GetFieldID(detRetClass, "mTop", "I");
+  gVisionDetRetOffsets.right = env->GetFieldID(detRetClass, "mRight", "I");
+  gVisionDetRetOffsets.bottom = env->GetFieldID(detRetClass, "mBottom", "I");
+  gVisionDetRetOffsets.addLandmark =
+      env->GetMethodID(detRetClass, "addLandmark", "(II)Z");
+  if (gVisionDetRetOffsets.addLandmark == NULL) {
+    LOG(FATAL) << "Can't Find Method addLandmark(int,int)";
+  }
   LOG(INFO) << "JniNativeClassIni Success";
 }
 
 jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniOpencvHOGDetect)(JNIEnv* env,
-							   jobject thiz,
-							   jstring imgPath) {
+                                                           jobject thiz,
+                                                           jstring imgPath) {
   LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniOpencvHOGDetect";
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
   if (!gOpencvHOGDetectorPtr)
@@ -121,7 +86,7 @@ jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniOpencvHOGDetect)(JNIEnv* env,
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetOpecvHOGRet)(JNIEnv* env, jobject thiz,
-				       jobject detRet, jint index) {
+                                       jobject detRet, jint index) {
   if (gOpencvHOGDetectorPtr) {
     cv::Rect rect = gOpencvHOGDetectorPtr->getResult()[index];
     env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.x);
@@ -139,12 +104,13 @@ jint JNIEXPORT JNICALL
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniDLibHOGDetect)(JNIEnv* env, jobject thiz,
-				      jstring imgPath, jstring modelPath) {
+                                      jstring imgPath, jstring modelPath) {
   LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniDLibHOGDetect";
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
   const char* model_path = env->GetStringUTFChars(imgPath, 0);
   if (!gDLibHOGDetectorPtr)
-    gDLibHOGDetectorPtr = std::make_shared<DLibHOGDetector>(std::string(model_path));
+    gDLibHOGDetectorPtr =
+        std::make_shared<DLibHOGDetector>(std::string(model_path));
 
   int size = gDLibHOGDetectorPtr->det(std::string(img_path));
   env->ReleaseStringUTFChars(imgPath, img_path);
@@ -154,7 +120,7 @@ jint JNIEXPORT JNICALL
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetDLibHOGRet)(JNIEnv* env, jobject thiz, jobject detRet,
-				      jint index) {
+                                      jint index) {
   if (gDLibHOGDetectorPtr) {
     dlib::rectangle rect = gDLibHOGDetectorPtr->getResult()[index];
     env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.left());
@@ -172,14 +138,15 @@ jint JNIEXPORT JNICALL
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniDLibHOGFaceDetect)(JNIEnv* env, jobject thiz,
-					  jstring imgPath,
-					  jstring landmarkPath) {
+                                          jstring imgPath,
+                                          jstring landmarkPath) {
   LOG(INFO) << "jniDLibHOGFaceDetect";
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
   const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
 
   if (!gDLibHOGFaceDetectorPtr)
-    gDLibHOGFaceDetectorPtr = std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
+    gDLibHOGFaceDetectorPtr =
+        std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
 
   int size = gDLibHOGFaceDetectorPtr->det(std::string(img_path));
   env->ReleaseStringUTFChars(imgPath, img_path);
@@ -187,31 +154,33 @@ jint JNIEXPORT JNICALL
   return size;
 }
 
-//Bitmap face detection
-//Author:zhao
-//Date:2016/5/10
-JNIEXPORT jint JNICALL DLIB_JNI_METHOD(jniBitmapFaceDect)
-  (JNIEnv *env, jobject thiz, jobject bitmap, jstring landmarkPath){
-	LOG(INFO) << "jniBitmapFaceDect";
-	cv::Mat rgbaMat;
-	cv::Mat brgMat;
-  convertBitmapToRgbaMat(env, bitmap, rgbaMat, true);
+// Bitmap face detection
+// Author:zhao
+// Date:2016/5/10
+JNIEXPORT jint JNICALL
+    DLIB_JNI_METHOD(jniBitmapFaceDect)(JNIEnv* env, jobject thiz,
+                                       jobject bitmap, jstring landmarkPath) {
+  LOG(INFO) << "jniBitmapFaceDect";
+  cv::Mat rgbaMat;
+  cv::Mat brgMat;
+  jnicommon::ConvertBitmapToRGBAMat(env, bitmap, rgbaMat, true);
   cv::cvtColor(rgbaMat, brgMat, cv::COLOR_RGBA2BGR);
-	const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
-	if (!gDLibHOGFaceDetectorPtr){
-      LOG(INFO) << "new DLibHOGFaceDetector, landmarkPath" << landmarkmodel_path;
-      gDLibHOGFaceDetectorPtr = std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
-	}
-  //cv::imwrite("/sdcard/ret.jpg", rgbaMat);
-	jint size = gDLibHOGFaceDetectorPtr->det(brgMat);
-	LOG(INFO) << "det face size: " << size;
-	env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
-	return size;
+  const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
+  if (!gDLibHOGFaceDetectorPtr) {
+    LOG(INFO) << "new DLibHOGFaceDetector, landmarkPath" << landmarkmodel_path;
+    gDLibHOGFaceDetectorPtr =
+        std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
+  }
+  // cv::imwrite("/sdcard/ret.jpg", rgbaMat);
+  jint size = gDLibHOGFaceDetectorPtr->det(brgMat);
+  LOG(INFO) << "det face size: " << size;
+  env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
+  return size;
 }
 
 jint JNIEXPORT JNICALL
     DLIB_JNI_METHOD(jniGetDLibHOGFaceRet)(JNIEnv* env, jobject thiz,
-					  jobject detRet, jint index) {
+                                          jobject detRet, jint index) {
   if (gDLibHOGFaceDetectorPtr) {
     dlib::rectangle rect = gDLibHOGFaceDetectorPtr->getResult()[index];
     env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.left());
@@ -222,23 +191,18 @@ jint JNIEXPORT JNICALL
     jstring jstr = (jstring)(env->NewStringUTF("face"));
     env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
 
-		std::unordered_map<int, dlib::full_object_detection>& faceShapeMap = gDLibHOGFaceDetectorPtr->getFaceShapeMap();
-		if (faceShapeMap.find(index) != faceShapeMap.end()) {
-			dlib::full_object_detection shape = faceShapeMap[index];
-			std::stringstream ss;
-			// If landmarks exists, set label as "face_landmarks "
-			if (shape.num_parts() > 0) {
-				ss << "face_landmarks ";
-			}
-		  for (int i = 0 ; i != shape.num_parts(); i++) {
-			  int x = shape.part(i).x();
-			  int y = shape.part(i).y();
-				ss << x << "," << y << ":";
-		  }
-			// TODO: Workaround. No availe time to better. It should be List<Point>
-      jstring jstr = (jstring)(env->NewStringUTF(ss.str().c_str()));
-      env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
-		}
+    std::unordered_map<int, dlib::full_object_detection>& faceShapeMap =
+        gDLibHOGFaceDetectorPtr->getFaceShapeMap();
+    if (faceShapeMap.find(index) != faceShapeMap.end()) {
+      dlib::full_object_detection shape = faceShapeMap[index];
+      for (int i = 0; i != shape.num_parts(); i++) {
+        // Add facelandmark
+        int x = shape.part(i).x();
+        int y = shape.part(i).y();
+        // Call addLandmark
+        env->CallBooleanMethod(detRet, gVisionDetRetOffsets.addLandmark, x, y);
+      }
+    }
     return JNI_OK;
   }
 
@@ -285,7 +249,8 @@ int main() {
 
   if (scale != 1.0) {
     cv::Mat outputMat;
-    cv::resize(src_img, outputMat, cv::Size(img_width * scale, img_height * scale));
+    cv::resize(src_img, outputMat,
+               cv::Size(img_width * scale, img_height * scale));
     src_img = outputMat;
   }
 
@@ -299,7 +264,8 @@ int main() {
   int i = 0;
   for (i = 0; i < dets.size(); i++) {
     dlib::rectangle dlibrect = dets[i];
-    cv::Rect r(dlibrect.left(), dlibrect.top(), dlibrect.width(), dlibrect.height());
+    cv::Rect r(dlibrect.left(), dlibrect.top(), dlibrect.width(),
+               dlibrect.height());
     r.x += cvRound(r.width * 0.1);
     r.width = cvRound(r.width * 0.8);
     r.y += cvRound(r.height * 0.06);
