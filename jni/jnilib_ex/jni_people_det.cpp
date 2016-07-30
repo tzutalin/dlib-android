@@ -162,17 +162,20 @@ JNIEXPORT jint JNICALL
                                        jobject bitmap, jstring landmarkPath) {
   LOG(INFO) << "jniBitmapFaceDect";
   cv::Mat rgbaMat;
-  cv::Mat brgMat;
+  cv::Mat bgrMat;
   jnicommon::ConvertBitmapToRGBAMat(env, bitmap, rgbaMat, true);
-  cv::cvtColor(rgbaMat, brgMat, cv::COLOR_RGBA2BGR);
+  cv::cvtColor(rgbaMat, bgrMat, cv::COLOR_RGBA2BGR);
   const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
   if (!gDLibHOGFaceDetectorPtr) {
     LOG(INFO) << "new DLibHOGFaceDetector, landmarkPath" << landmarkmodel_path;
     gDLibHOGFaceDetectorPtr =
         std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
   }
-  // cv::imwrite("/sdcard/ret.jpg", rgbaMat);
-  jint size = gDLibHOGFaceDetectorPtr->det(brgMat);
+  // Debug
+  //cv::Mat rgbMat;
+  //cv::cvtColor(bgrMat, rgbMat, cv::COLOR_BGR2RGB);
+  //cv::imwrite("/sdcard/ret.jpg", rgbaMat);
+  jint size = gDLibHOGFaceDetectorPtr->det(bgrMat);
   LOG(INFO) << "det face size: " << size;
   env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
   return size;

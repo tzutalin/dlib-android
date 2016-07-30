@@ -32,7 +32,7 @@ class OpencvHOGDetctor {
  public:
   OpencvHOGDetctor() {}
 
-  inline int det(std::string path) {
+  inline int det(const std::string& path) {
     LOG(INFO) << "det path : " << path;
     cv::Mat src_img = cv::imread(path, CV_LOAD_IMAGE_COLOR);
     if (src_img.empty()) return 0;
@@ -170,15 +170,15 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
     return det(src_img);
   }
 
-  // The format of mat should be BGR
+  // The format of mat should be BGR or Gray
+  // If converting 4 channels to 3 channls because the format could be BGRA or ARGB
   virtual inline int det(const cv::Mat& image) {
     if (image.empty()) return 0;
     LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
-    if (image.channels() == 4) {
-      cv::cvtColor(image, image, CV_BGRA2BGR);
-    } else if (image.channels() == 1) {
+    if (image.channels() == 1) {
       cv::cvtColor(image, image, CV_GRAY2BGR);
     }
+    CHECK(image.channels() == 3);
     // TODO : Convert to gray image to speed up detection
     // It's unnecessary to use color image for face/landmark detection
     dlib::cv_image<dlib::bgr_pixel> img(image);
