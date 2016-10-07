@@ -56,7 +56,7 @@ void JNIEXPORT DLIB_JNI_METHOD(jniNativeClassInit)(JNIEnv* env, jclass _this) {
   jclass detRetClass = env->FindClass("com/tzutalin/dlib/VisionDetRet");
   CHECK_NOTNULL(detRetClass);
   gVisionDetRetOffsets.label =
-      env->GetFieldID(detRetClass, "mLabel", "java/lang/String");
+      env->GetFieldID(detRetClass, "mLabel", "Ljava/lang/String;");
   gVisionDetRetOffsets.confidence =
       env->GetFieldID(detRetClass, "mConfidence", "F");
   gVisionDetRetOffsets.left = env->GetFieldID(detRetClass, "mLeft", "I");
