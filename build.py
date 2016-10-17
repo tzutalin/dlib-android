@@ -2,7 +2,7 @@
 import os
 import sys
 import argparse
-from distutils.dir_util import copy_tree
+import shutil
 import subprocess
 from subprocess import Popen, PIPE
 
@@ -105,13 +105,16 @@ def test():
     subprocess.call(['adb', 'shell', './data/local/tmp/face_landmark', '/data/local/tmp/shape_predictor_68_face_landmarks.dat', '/data/local/tmp/lena.bmp'])
 
 def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
-            copy_tree(s, d, symlinks, ignore)
+            copytree(s, d, symlinks, ignore)
         else:
-            print 'Copy errors'
+            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                shutil.copy2(s, d)
 
 if __name__ == '__main__':
     # Move to top-level
@@ -124,12 +127,16 @@ if __name__ == '__main__':
     setDeviceABI()
 
     args = parse_args()
+
+    if args.test:
+        os.environ['Test'] = "true"
+
     if args.clean:
         ndk_clean()
     else:
         ndk_build(args)
 
-    if args.android_project:
+    if args.android_project and os.path.exists(args.android_project):
         srcFolder = os.path.join('libs')
         copytree(srcFolder, args.android_project)
 
