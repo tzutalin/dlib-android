@@ -38,33 +38,26 @@
 ### Build and Run
 * You can change the compiler architecture in dlib-android/jni/Application.mk
 
-* Curretnly, it will build executable files like svm_ex, Selective search example, and JNI shared library
+* The way to build native code and copy the shared library to Android Studio's project, dlib-android-app/dlib/src/main/jniLibs
 
-* Push the executable files to Android devices and run all test daemons on your devices. Remember to connect to Android device
+```sh
+    $ cd [dlib-android]
+    $ python build.py
+```
 
-`$ cd [dlib-android]`
-
-`$ python build_push.py --test`
-
-If you want to use it for Android Java application and copy the shared lib to your Android project, please execute it
- `$ python build_push.py --android_project dlib-android-app/dlib/src/main/jniLibs/`
-
-* Alternative way to build:
-
-`$ cd [dlib-android]`
-
-`$ ndk-build -j 2`
-
-### Write JNI and build shared library for Android Java application
-* There are JNI examples in [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
-
-* There is a sample app to demonstrate the result. [dlib-android-app](https://github.com/tzutalin/dlib-android-app) demonstrates the library whose source is located under [jnilib_ex](https://github.com/tzutalin/dlib-android/tree/master/jni/jnilib_ex)
+Alternative way to build native code and copy to the Android Studio's project manually:
+```sh
+    $ cd [dlib-android]
+    $ ndk-build -j 2
+    $ cp -r libs/* dlib-android-app/dlib/src/main/jniLibs
+```
 
 ### Do you want to contribute
  * If you have any improvement or you've found any bug, send a pull request with the code.
 
  * Give me a star on this repository
 
-### Future task
+### Future tasks
+* Use cmake instead of Android.mk
 * Add more examples to [dlib-android-app](https://github.com/tzutalin/dlib-android-app)
 

@@ -4,3 +4,6 @@
 [submodule "jni/dlib"]
 	path = jni/dlib
 	url = https://github.com/davisking/dlib.git
+[submodule "dlib-android-app"]
+	path = dlib-android-app
+	url = https://github.com/tzutalin/dlib-android-app.git

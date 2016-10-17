@@ -28,7 +28,7 @@ def parse_args():
 
     parser.add_argument('--android_project', dest='android_project',
                         help='Android JNI folder path',
-                        default=None, type=str)
+                        default=os.path.join('dlib-android-app', 'dlib', 'src', 'main', 'jniLibs'), type=str)
 
     parser.add_argument('--clean', action='store_true',
                         help='clean obj and binaries')
