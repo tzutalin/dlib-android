@@ -107,7 +107,7 @@ jint JNIEXPORT JNICALL
                                       jstring imgPath, jstring modelPath) {
   LOG(INFO) << "com_tzutalin_dlib_PeopleDet jniDLibHOGDetect";
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
-  const char* model_path = env->GetStringUTFChars(imgPath, 0);
+  const char* model_path = env->GetStringUTFChars(modelPath, 0);
   if (!gDLibHOGDetectorPtr)
     gDLibHOGDetectorPtr =
         std::make_shared<DLibHOGDetector>(std::string(model_path));
