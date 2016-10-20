@@ -14,10 +14,12 @@ LOCAL_C_INCLUDES +=  \
 
 LOCAL_SRC_FILES += \
 	       jni_people_det.cpp \
+	       jni_face_det.cpp \
            imageutils_jni.cpp \
            common/rgb2yuv.cpp \
            common/yuv2rgb.cpp \
-           common/bitmap2mat.cpp
+           common/bitmap2mat.cpp \
+           common/fileutils.cpp
 
 LOCAL_LDLIBS += -lm -llog -ldl -lz -ljnigraphics
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11
