@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/fileutils.h>
+#include <common/jni_fileutils.h>
 #include <dlib/image_loader/load_image.h>
 #include <dlib/image_processing.h>
 #include <dlib/image_processing/frontal_face_detector.h>
@@ -32,9 +32,7 @@ class OpencvHOGDetctor {
  public:
   OpencvHOGDetctor() {}
 
-  inline int det(const std::string& path) {
-    LOG(INFO) << "det path : " << path;
-    cv::Mat src_img = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+  inline int det(const cv::Mat& src_img) {
     if (src_img.empty()) return 0;
 
     cv::HOGDescriptor hog;
@@ -81,7 +79,7 @@ class DLibHOGDetector {
 
   inline void init() {
     LOG(INFO) << "Model Path: " << mModelPath;
-    if (jnicommon::fileExists(mModelPath)) {
+    if (jniutils::fileExists(mModelPath)) {
       dlib::deserialize(mModelPath) >> mObjectDetector;
     } else {
       LOG(INFO) << "Not exist " << mModelPath;
@@ -96,7 +94,7 @@ class DLibHOGDetector {
   }
 
   virtual inline int det(const std::string& path) {
-    using namespace jnicommon;
+    using namespace jniutils;
     if (!fileExists(mModelPath) || !fileExists(path)) {
       LOG(WARNING) << "No modle path or input file path";
       return 0;
@@ -158,7 +156,7 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
   DLibHOGFaceDetector(const std::string& landmarkmodel)
       : mLandMarkModel(landmarkmodel) {
     init();
-    if (!mLandMarkModel.empty() && jnicommon::fileExists(mLandMarkModel)) {
+    if (!mLandMarkModel.empty() && jniutils::fileExists(mLandMarkModel)) {
       dlib::deserialize(mLandMarkModel) >> msp;
       LOG(INFO) << "Load landmarkmodel from " << mLandMarkModel;
     }

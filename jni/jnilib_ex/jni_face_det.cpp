@@ -1,5 +1,5 @@
 /*
- * jni_people_det.cpp using google-style
+ * jni_pedestrian_det.cpp using google-style
  *
  *  Created on: Oct 20, 2015
  *      Author: Tzutalin
@@ -7,25 +7,73 @@
  *  Copyright (c) 2015 Tzutalin. All rights reserved.
  */
 #include <android/bitmap.h>
-#include <common/bitmap2mat.h>
+#include <common/jni_bitmap2mat.h>
+#include <common/jni_primitives.h>
+#include <common/jni_fileutils.h>
+#include <common/jni_utils.h>
 #include <detector.h>
 #include <jni.h>
 
+
 using namespace cv;
 
-namespace {
-std::shared_ptr<DLibHOGFaceDetector> gDLibHOGFaceLandmarkDetectorPtr;
-std::shared_ptr<DLibHOGFaceDetector> gDLibHOGFaceDetectorPtr;
+extern JNI_VisionDetRet *g_pJNI_VisionDetRet;
 
-struct VisionDetRetOffsets {
-  jfieldID label;
-  jfieldID confidence;
-  jfieldID left;
-  jfieldID top;
-  jfieldID right;
-  jfieldID bottom;
-  jmethodID addLandmark;
-} gVisionDetRetOffsets;
+namespace {
+
+#define JAVA_NULL 0
+using DetectorPtr = DLibHOGFaceDetector*;
+
+class JNI_FaceDet {
+ public:
+  JNI_FaceDet(JNIEnv *env) {
+    jclass clazz = env->FindClass(CLASSNAME_FACE_DET);
+    mNativeContext = env->GetFieldID(clazz, "mNativeFaceDetContext", "J");
+    env->DeleteLocalRef(clazz);
+  }
+
+  DetectorPtr getDetectorPtrFromJava(JNIEnv* env, jobject thiz) {
+    DetectorPtr const p = (DetectorPtr) env->GetLongField(thiz, mNativeContext);
+    return p;
+  }
+
+  void setDetectorPtrToJava(JNIEnv* env, jobject thiz, jlong ptr) {
+    env->SetLongField(thiz, mNativeContext, ptr);
+  }
+
+  jfieldID mNativeContext;
+};
+
+// Protect getting/setting and creating/deleting pointer between java/native
+std::mutex gLock;
+
+std::shared_ptr<JNI_FaceDet> getJNI_FaceDet(JNIEnv* env) {
+  static std::once_flag sOnceInitflag;
+  static std::shared_ptr<JNI_FaceDet> sJNI_FaceDet;
+  std::call_once(sOnceInitflag, [env]() {sJNI_FaceDet = std::make_shared<JNI_FaceDet>(env);});
+  return sJNI_FaceDet;
+}
+
+DetectorPtr const getDetectorPtr(JNIEnv* env, jobject thiz) {
+  std::lock_guard<std::mutex> lock(gLock);
+  return getJNI_FaceDet(env)->getDetectorPtrFromJava(env, thiz);
+}
+
+// The function to set a pointer to java and delete it if newPtr is empty
+void setDetectorPtr(JNIEnv* env, jobject thiz, DetectorPtr newPtr) {
+  std::lock_guard<std::mutex> lock(gLock);
+  DetectorPtr oldPtr = getJNI_FaceDet(env)->getDetectorPtrFromJava(env, thiz);
+  if (oldPtr != JAVA_NULL) {
+    DLOG(INFO) << "setMapManager delete old ptr : " << oldPtr;
+    delete oldPtr;
+  }
+
+  if (newPtr != JAVA_NULL) {
+    DLOG(INFO) << "setMapManager set new ptr : " << newPtr;
+  }
+
+  getJNI_FaceDet(env)->setDetectorPtrToJava(env, thiz, (jlong) newPtr);
+}
 
 }  // end unnamespace
 
@@ -34,156 +82,76 @@ extern "C" {
 #endif
 
 
-
-
 #define DLIB_FACE_JNI_METHOD(METHOD_NAME) \
-  Java_com_tzutalin_dlib_FaceDet_##METHOD_NAME
+    Java_com_tzutalin_dlib_FaceDet_##METHOD_NAME
 
 void JNIEXPORT DLIB_FACE_JNI_METHOD(jniNativeClassInit)(JNIEnv* env, jclass _this) {
-  jclass detRetClass = env->FindClass("com/tzutalin/dlib/VisionDetRet");
-  CHECK_NOTNULL(detRetClass);
-  gVisionDetRetOffsets.label =
-      env->GetFieldID(detRetClass, "mLabel", "Ljava/lang/String;");
-  gVisionDetRetOffsets.confidence =
-      env->GetFieldID(detRetClass, "mConfidence", "F");
-  gVisionDetRetOffsets.left = env->GetFieldID(detRetClass, "mLeft", "I");
-  gVisionDetRetOffsets.top = env->GetFieldID(detRetClass, "mTop", "I");
-  gVisionDetRetOffsets.right = env->GetFieldID(detRetClass, "mRight", "I");
-  gVisionDetRetOffsets.bottom = env->GetFieldID(detRetClass, "mBottom", "I");
-  gVisionDetRetOffsets.addLandmark =
-      env->GetMethodID(detRetClass, "addLandmark", "(II)Z");
-  if (gVisionDetRetOffsets.addLandmark == NULL) {
-    LOG(FATAL) << "Can't Find Method addLandmark(int,int)";
-  }
-  LOG(INFO) << "JniNativeClassIni Success";
 }
 
-jobjectArray getFaceRet(JNIEnv* env, std::shared_ptr<DLibHOGFaceDetector> faceDetector, int size){
+jobjectArray getDetectResult(JNIEnv* env, DetectorPtr faceDetector, const int& size) {
   LOG(INFO) << "getFaceRet";
-  jclass detRetClass = env->FindClass("com/tzutalin/dlib/VisionDetRet");
-
-  jmethodID mid = env->GetMethodID(detRetClass,"<init>", "()V");
-
-  jobjectArray detRetArr = (jobjectArray)env->NewObjectArray(size, detRetClass, NULL);
-  for(int i =0; i < size; i++){
-      jobject detRet = env->NewObject(detRetClass, mid);
-      env->SetObjectArrayElement(detRetArr, i, detRet);
-
-      dlib::rectangle rect = faceDetector->getResult()[i];
-      env->SetIntField(detRet, gVisionDetRetOffsets.left, rect.left());
-      env->SetIntField(detRet, gVisionDetRetOffsets.top, rect.top());
-      env->SetIntField(detRet, gVisionDetRetOffsets.right, rect.right());
-      env->SetIntField(detRet, gVisionDetRetOffsets.bottom, rect.bottom());
-      env->SetFloatField(detRet, gVisionDetRetOffsets.confidence, 0);
-      jstring jstr = (jstring)(env->NewStringUTF("face"));
-      env->SetObjectField(detRet, gVisionDetRetOffsets.label, (jobject)jstr);
-
-      std::unordered_map<int, dlib::full_object_detection>& faceShapeMap =
-          faceDetector->getFaceShapeMap();
-      if (faceShapeMap.find(i) != faceShapeMap.end()) {
-        dlib::full_object_detection shape = faceShapeMap[i];
-        for (int j = 0; j != shape.num_parts(); j++) {
-          // Add facelandmark
-          int x = shape.part(j).x();
-          int y = shape.part(j).y();
-          // Call addLandmark
-          env->CallBooleanMethod(detRet, gVisionDetRetOffsets.addLandmark, x, y);
-        }
+  jobjectArray jDetRetArray = JNI_VisionDetRet::createJObjectArray(env, size);
+  for (int i = 0; i < size; i++) {
+    jobject jDetRet = JNI_VisionDetRet::createJObject(env);
+    env->SetObjectArrayElement(jDetRetArray, i, jDetRet);
+    dlib::rectangle rect = faceDetector->getResult()[i];
+    g_pJNI_VisionDetRet->setRect(env, jDetRet, rect.left(), rect.top(),
+                                 rect.right(), rect.bottom());
+    g_pJNI_VisionDetRet->setLabel(env, jDetRet, "face");
+    std::unordered_map<int, dlib::full_object_detection>& faceShapeMap = faceDetector->getFaceShapeMap();
+    if (faceShapeMap.find(i) != faceShapeMap.end()) {
+      dlib::full_object_detection shape = faceShapeMap[i];
+      for (int j = 0; j != shape.num_parts(); j++) {
+        int x = shape.part(j).x();
+        int y = shape.part(j).y();
+        // Call addLandmark
+        g_pJNI_VisionDetRet->addLandmark(env, jDetRet, x, y);
       }
+    }
   }
-  return detRetArr;
+  return jDetRetArray;
 }
 
 JNIEXPORT jobjectArray JNICALL
-    DLIB_FACE_JNI_METHOD(jniFaceLandmarkDet)(JNIEnv* env, jobject thiz,
-                                          jstring imgPath,
-                                          jstring landmarkPath) {
-  LOG(INFO) << "jniFaceLandmarkDet";
-  const char* img_path = env->GetStringUTFChars(imgPath, 0);
-  const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
-
-  if (!gDLibHOGFaceLandmarkDetectorPtr)
-    gDLibHOGFaceLandmarkDetectorPtr =
-        std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
-
-  int size = gDLibHOGFaceLandmarkDetectorPtr->det(std::string(img_path));
-  env->ReleaseStringUTFChars(imgPath, img_path);
-  env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
-  LOG(INFO) << "det face size: " << size;
-  return getFaceRet(env,gDLibHOGFaceLandmarkDetectorPtr, size);
-}
-
-// Bitmap face detection
-// Author:zhao
-// Date:2016/5/10
-JNIEXPORT jobjectArray JNICALL
-    DLIB_FACE_JNI_METHOD(jniBitmapFaceLandmarkDet)(JNIEnv* env, jobject thiz,
-                                          jobject bitmap,
-                                          jstring landmarkPath) {
-  LOG(INFO) << "jniBitmapFaceLandmarkDet";
-  cv::Mat rgbaMat;
-  cv::Mat bgrMat;
-  jnicommon::ConvertBitmapToRGBAMat(env, bitmap, rgbaMat, true);
-  cv::cvtColor(rgbaMat, bgrMat, cv::COLOR_RGBA2BGR);
-  const char* landmarkmodel_path = env->GetStringUTFChars(landmarkPath, 0);
-  if (!gDLibHOGFaceLandmarkDetectorPtr) {
-    LOG(INFO) << "new DLibHOGFaceDetector, landmarkPath" << landmarkmodel_path;
-    gDLibHOGFaceLandmarkDetectorPtr =
-        std::make_shared<DLibHOGFaceDetector>(landmarkmodel_path);
-  }
-  // Debug
-  //cv::Mat rgbMat;
-  //cv::cvtColor(bgrMat, rgbMat, cv::COLOR_BGR2RGB);
-  //cv::imwrite("/sdcard/ret.jpg", rgbaMat);
-  jint size = gDLibHOGFaceLandmarkDetectorPtr->det(bgrMat);
-  LOG(INFO) << "det face size: " << size;
-  env->ReleaseStringUTFChars(landmarkPath, landmarkmodel_path);
-  return getFaceRet(env,gDLibHOGFaceLandmarkDetectorPtr,size);
-}
-
-JNIEXPORT jobjectArray JNICALL
-    DLIB_FACE_JNI_METHOD(jniFaceDet)(JNIEnv* env, jobject thiz, jstring imgPath){
+DLIB_FACE_JNI_METHOD(jniDetect)(JNIEnv* env, jobject thiz, jstring imgPath){
   LOG(INFO) << "jniFaceDet";
-
   const char* img_path = env->GetStringUTFChars(imgPath, 0);
-
-  if (!gDLibHOGFaceDetectorPtr)
-    gDLibHOGFaceDetectorPtr =
-            std::make_shared<DLibHOGFaceDetector>();
-
-  int size = gDLibHOGFaceDetectorPtr->det(std::string(img_path));
+  DetectorPtr detPtr = getDetectorPtr(env, thiz);
+  int size = detPtr->det(std::string(img_path));
   env->ReleaseStringUTFChars(imgPath, img_path);
   LOG(INFO) << "det face size: " << size;
-  return getFaceRet(env,gDLibHOGFaceDetectorPtr,size);
+  return getDetectResult(env,detPtr,size);
 }
 
 JNIEXPORT jobjectArray JNICALL
-    DLIB_FACE_JNI_METHOD(jniBitmapFaceDet)(JNIEnv* env, jobject thiz, jobject bitmap){
+DLIB_FACE_JNI_METHOD(jniBitmapDetect)(JNIEnv* env, jobject thiz, jobject bitmap){
   LOG(INFO) << "jniBitmapFaceDet";
   cv::Mat rgbaMat;
   cv::Mat bgrMat;
-  jnicommon::ConvertBitmapToRGBAMat(env, bitmap, rgbaMat, true);
+  jniutils::ConvertBitmapToRGBAMat(env, bitmap, rgbaMat, true);
   cv::cvtColor(rgbaMat, bgrMat, cv::COLOR_RGBA2BGR);
-  if (!gDLibHOGFaceDetectorPtr) {
-    gDLibHOGFaceDetectorPtr =
-        std::make_shared<DLibHOGFaceDetector>();
-  }
-
-  jint size = gDLibHOGFaceDetectorPtr->det(bgrMat);
+  DetectorPtr detPtr = getDetectorPtr(env, thiz);
+  jint size = detPtr->det(bgrMat);
+#if 0
+  cv::Mat rgbMat;
+  cv::cvtColor(bgrMat, rgbMat, cv::COLOR_BGR2RGB);
+  cv::imwrite("/sdcard/ret.jpg", rgbaMat);
+#endif
   LOG(INFO) << "det face size: " << size;
-
-  return getFaceRet(env,gDLibHOGFaceDetectorPtr,size);
+  return getDetectResult(env, detPtr, size);
 }
 
-
-jint JNIEXPORT JNICALL DLIB_FACE_JNI_METHOD(jniInit)(JNIEnv* env, jobject thiz) {
+jint JNIEXPORT JNICALL DLIB_FACE_JNI_METHOD(jniInit)(JNIEnv* env, jobject thiz, jstring jLandmarkPath) {
+  LOG(INFO) << "jniInit";
+  std::string landmarkPath = jniutils::convertJStrToString(env, jLandmarkPath);
+  DetectorPtr detPtr = new DLibHOGFaceDetector(landmarkPath);
+  setDetectorPtr(env, thiz, detPtr);;
   return JNI_OK;
 }
 
 jint JNIEXPORT JNICALL DLIB_FACE_JNI_METHOD(jniDeInit)(JNIEnv* env, jobject thiz) {
   LOG(INFO) << "jniDeInit";
-  gDLibHOGFaceDetectorPtr.reset();
-  gDLibHOGFaceLandmarkDetectorPtr.reset();
+  setDetectorPtr(env, thiz, JAVA_NULL);
   return JNI_OK;
 }
 

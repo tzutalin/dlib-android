@@ -3,7 +3,7 @@
  * Create by TzuTaLin <tzu.ta.lin@gmail.com>
  */
 
-#include <common/fileutils.h>
+#include "jni_fileutils.h"
 
 /*
  *     Author : TzuTaLin
@@ -11,7 +11,7 @@
  *
  * Copyright (c) 2016 Tzutalin. All rights reserved.
  */
-namespace jnicommon {
+namespace jniutils {
 
 bool fileExists(const char *name) {
   std::ifstream ifs(name);
@@ -32,5 +32,5 @@ bool dirExists(const std::string& name) {
   return dirExists(name.c_str());
 }
 
-} // end jnicommon
+} // end jniutils
  /* FILEUTILS_H */

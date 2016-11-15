@@ -12,10 +12,10 @@
  *
  * Copyright (c) 2016 Tzutalin. All rights reserved.
  */
-namespace jnicommon {
+namespace jniutils {
 
 void ConvertBitmapToRGBAMat(JNIEnv * env, jobject& bitmap, cv::Mat& dst, bool needUnPremultiplyAlpha);
 
-} //end jnicommon
+} //end jniutils
 
 #endif /* BITMAP2MAT_H */

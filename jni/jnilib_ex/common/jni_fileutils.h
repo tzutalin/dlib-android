@@ -17,7 +17,7 @@
  *
  * Copyright (c) 2016 Tzutalin. All rights reserved.
  */
-namespace jnicommon {
+namespace jniutils {
 
 bool fileExists(const char *name);
 
@@ -27,5 +27,5 @@ bool fileExists(const std::string& name);
 
 bool dirExists(const std::string& name);
 
-} // end jnicommon
+} // end jniutils
  /* FILEUTILS_H */

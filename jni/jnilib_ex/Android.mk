@@ -7,19 +7,20 @@ OPENCV_CAMERA_MODULES := off
 OPENCV_LIB_TYPE := STATIC
 include $(OPENCV_PATH)/OpenCV.mk
 
-LOCAL_MODULE := people_det
+LOCAL_MODULE := android_dlib
 
 LOCAL_C_INCLUDES +=  \
            $(OPENCV_INCLUDE_DIR)
 
 LOCAL_SRC_FILES += \
-	       jni_people_det.cpp \
+           jni_imageutils.cpp \
+	       jni_pedestrian_det.cpp \
 	       jni_face_det.cpp \
-           imageutils_jni.cpp \
            common/rgb2yuv.cpp \
            common/yuv2rgb.cpp \
-           common/bitmap2mat.cpp \
-           common/fileutils.cpp
+           common/jni_bitmap2mat.cpp \
+           common/jni_utils.cpp \
+           common/jni_fileutils.cpp
 
 LOCAL_LDLIBS += -lm -llog -ldl -lz -ljnigraphics
 LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11
