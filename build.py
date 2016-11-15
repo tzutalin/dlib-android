@@ -116,6 +116,14 @@ def copytree(src, dst, symlinks=False, ignore=None):
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
+def copySoToAS(src, dst):
+    for root, subdirs, files in os.walk(src):
+        for f in files:
+            if f.endswith('.so'):
+                path = os.path.join(root, f)
+                abis = os.path.basename(os.path.dirname(path))
+                shutil.copy(path, os.path.join(dst, abis))
+
 if __name__ == '__main__':
     # Move to top-level
     ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -138,7 +146,7 @@ if __name__ == '__main__':
 
     if args.android_project and os.path.exists(args.android_project):
         srcFolder = os.path.join('libs')
-        copytree(srcFolder, args.android_project)
+        copySoToAS(srcFolder, args.android_project)
 
     if args.test:
         test()
