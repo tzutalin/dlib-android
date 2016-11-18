@@ -42,5 +42,5 @@ void ConvertYUV420SPToRGB565(const uint8* const input, uint16* const output,
 
 #ifdef __cplusplus
 }
-} //end jnicommon
+}  // end jnicommon
 #endif

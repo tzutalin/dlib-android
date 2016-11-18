@@ -19,9 +19,8 @@ void ConvertBitmapToRGBAMat(JNIEnv* env, jobject& bitmap, Mat& dst,
 
   try {
     CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
-    CV_Assert(
-        info.format == ANDROID_BITMAP_FORMAT_RGBA_8888
-            || info.format == ANDROID_BITMAP_FORMAT_RGB_565);
+    CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 ||
+              info.format == ANDROID_BITMAP_FORMAT_RGB_565);
     CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
     CV_Assert(pixels);
     dst.create(info.height, info.width, CV_8UC4);

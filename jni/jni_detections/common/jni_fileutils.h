@@ -19,13 +19,13 @@
  */
 namespace jniutils {
 
-bool fileExists(const char *name);
+bool fileExists(const char* name);
 
-bool dirExists(const char *name);
+bool dirExists(const char* name);
 
 bool fileExists(const std::string& name);
 
 bool dirExists(const std::string& name);
 
-} // end jniutils
- /* FILEUTILS_H */
+}  // end jniutils
+   /* FILEUTILS_H */

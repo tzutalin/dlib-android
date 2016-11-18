@@ -12,11 +12,11 @@
 
 // Java Integer/Float
 
-JNI_Integer *g_pJniInteger;
-JNI_Float *g_pJniFloat;
-JNI_PointF *g_pJniPointF;
+JNI_Integer* g_pJniInteger;
+JNI_Float* g_pJniFloat;
+JNI_PointF* g_pJniPointF;
 
-JNI_VisionDetRet *g_pJNI_VisionDetRet;
+JNI_VisionDetRet* g_pJNI_VisionDetRet;
 
 JavaVM* g_javaVM = NULL;
 
@@ -24,7 +24,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   DLOG(INFO) << "JNI_OnLoad enter";
   g_javaVM = vm;
   JNIEnv* env;
-  vm->GetEnv((void**) &env, JNI_VERSION_1_6);
+  vm->GetEnv((void**)&env, JNI_VERSION_1_6);
 
   // Java Integer/Float
   g_pJniInteger = new JNI_Integer(env);
@@ -36,7 +36,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   return JNI_VERSION_1_6;
 }
 
-void JNI_OnUnload(JavaVM *vm, void *reserved) {
+void JNI_OnUnload(JavaVM* vm, void* reserved) {
   DLOG(INFO) << "JNI_OnUnload enter";
   g_javaVM = NULL;
 
@@ -60,7 +60,7 @@ char* convertJStrToCStr(JNIEnv* env, jstring lString) {
 
   jsize lStringLength = env->GetStringUTFLength(lString);
 
-  pstring = (char*) malloc(sizeof(char) * (lStringLength + 1));
+  pstring = (char*)malloc(sizeof(char) * (lStringLength + 1));
   strcpy(pstring, lStringTmp);
 
   env->ReleaseStringUTFChars(lString, lStringTmp);
@@ -85,7 +85,7 @@ std::string convertJStrToString(JNIEnv* env, jstring lString) {
 
 JNIEnv* vm2env(JavaVM* vm) {
   JNIEnv* env = NULL;
-  if (vm->GetEnv((void**) &env, JNI_VERSION_1_6) != JNI_OK) {
+  if (vm->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK) {
     DLOG(WARNING) << "vm2env failed";
     env = NULL;
   }
@@ -94,5 +94,4 @@ JNIEnv* vm2env(JavaVM* vm) {
   }
   return env;
 }
-
 }

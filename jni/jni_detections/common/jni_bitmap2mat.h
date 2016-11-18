@@ -14,8 +14,9 @@
  */
 namespace jniutils {
 
-void ConvertBitmapToRGBAMat(JNIEnv * env, jobject& bitmap, cv::Mat& dst, bool needUnPremultiplyAlpha);
+void ConvertBitmapToRGBAMat(JNIEnv* env, jobject& bitmap, cv::Mat& dst,
+                            bool needUnPremultiplyAlpha);
 
-} //end jniutils
+}  // end jniutils
 
 #endif /* BITMAP2MAT_H */

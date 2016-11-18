@@ -15,7 +15,7 @@
 #include <jni.h>
 
 using namespace cv;
-extern JNI_VisionDetRet *g_pJNI_VisionDetRet;
+extern JNI_VisionDetRet* g_pJNI_VisionDetRet;
 
 namespace {
 
@@ -24,14 +24,14 @@ using DetectorPtr = OpencvHOGDetctor*;
 
 class JNI_PedestrianDet {
  public:
-  JNI_PedestrianDet(JNIEnv *env) {
+  JNI_PedestrianDet(JNIEnv* env) {
     jclass clazz = env->FindClass(CLASSNAME_PEDESTRIAN_DET);
     mNativeContext = env->GetFieldID(clazz, "mNativeDetContext", "J");
     env->DeleteLocalRef(clazz);
   }
 
   DetectorPtr getDetectorPtrFromJava(JNIEnv* env, jobject thiz) {
-    DetectorPtr const p = (DetectorPtr) env->GetLongField(thiz, mNativeContext);
+    DetectorPtr const p = (DetectorPtr)env->GetLongField(thiz, mNativeContext);
     return p;
   }
 
@@ -48,21 +48,22 @@ std::mutex gLock;
 std::shared_ptr<JNI_PedestrianDet> getJNI_PedestrianDet(JNIEnv* env) {
   static std::once_flag sOnceInitflag;
   static std::shared_ptr<JNI_PedestrianDet> sJNI_PedestrianDet;
-  std::call_once(
-      sOnceInitflag,
-      [env]() {sJNI_PedestrianDet = std::make_shared<JNI_PedestrianDet>(env);});
+  std::call_once(sOnceInitflag, [env]() {
+    sJNI_PedestrianDet = std::make_shared<JNI_PedestrianDet>(env);
+  });
   return sJNI_PedestrianDet;
 }
 
 DetectorPtr const getDetectorPtr(JNIEnv* env, jobject thiz) {
-  std::lock_guard < std::mutex > lock(gLock);
+  std::lock_guard<std::mutex> lock(gLock);
   return getJNI_PedestrianDet(env)->getDetectorPtrFromJava(env, thiz);
 }
 
 // The function to set a pointer to java and delete it if newPtr is empty
 void setDetectorPtr(JNIEnv* env, jobject thiz, DetectorPtr newPtr) {
-  std::lock_guard < std::mutex > lock(gLock);
-  DetectorPtr oldPtr = getJNI_PedestrianDet(env)->getDetectorPtrFromJava(env, thiz);
+  std::lock_guard<std::mutex> lock(gLock);
+  DetectorPtr oldPtr =
+      getJNI_PedestrianDet(env)->getDetectorPtrFromJava(env, thiz);
   if (oldPtr != JAVA_NULL) {
     DLOG(INFO) << "setMapManager delete old ptr : " << oldPtr;
     delete oldPtr;
@@ -72,7 +73,7 @@ void setDetectorPtr(JNIEnv* env, jobject thiz, DetectorPtr newPtr) {
     DLOG(INFO) << "setMapManager set new ptr : " << newPtr;
   }
 
-  getJNI_PedestrianDet(env)->setDetectorPtrToJava(env, thiz, (jlong) newPtr);
+  getJNI_PedestrianDet(env)->setDetectorPtrToJava(env, thiz, (jlong)newPtr);
 }
 
 }  // end unnamespace
@@ -85,10 +86,9 @@ extern "C" {
 // JNI Mapping Methods
 // ========================================================
 #define DLIB_JNI_METHOD(METHOD_NAME) \
-    Java_com_tzutalin_dlib_PedestrianDet_##METHOD_NAME
+  Java_com_tzutalin_dlib_PedestrianDet_##METHOD_NAME
 
-jobjectArray getDetRet(JNIEnv* env, DetectorPtr detectorPtr,
-                       const int& size) {
+jobjectArray getDetRet(JNIEnv* env, DetectorPtr detectorPtr, const int& size) {
   LOG(INFO) << "getDetRet";
   jobjectArray jDetRetArray = JNI_VisionDetRet::createJObjectArray(env, size);
   for (int i = 0; i < size; i++) {
@@ -96,15 +96,14 @@ jobjectArray getDetRet(JNIEnv* env, DetectorPtr detectorPtr,
     env->SetObjectArrayElement(jDetRetArray, i, jDetRet);
     cv::Rect rect = detectorPtr->getResult()[i];
     g_pJNI_VisionDetRet->setRect(env, jDetRet, rect.x, rect.y,
-                                 rect.x + rect.width,
-                                 rect.y + rect.height);
+                                 rect.x + rect.width, rect.y + rect.height);
     g_pJNI_VisionDetRet->setLabel(env, jDetRet, "Pedestrian");
   }
   return jDetRetArray;
 }
 
 JNIEXPORT jobjectArray JNICALL
-DLIB_JNI_METHOD(jniDetect)(JNIEnv* env, jobject thiz, jstring jImgPath) {
+    DLIB_JNI_METHOD(jniDetect)(JNIEnv* env, jobject thiz, jstring jImgPath) {
   LOG(INFO) << "jniPeopleDet";
   std::string path = jniutils::convertJStrToString(env, jImgPath);
   cv::Mat src_img = cv::imread(path, CV_LOAD_IMAGE_COLOR);
@@ -115,7 +114,8 @@ DLIB_JNI_METHOD(jniDetect)(JNIEnv* env, jobject thiz, jstring jImgPath) {
 }
 
 JNIEXPORT jobjectArray JNICALL
-DLIB_JNI_METHOD(jniBitmapDetect)(JNIEnv* env, jobject thiz, jobject bitmap) {
+    DLIB_JNI_METHOD(jniBitmapDetect)(JNIEnv* env, jobject thiz,
+                                     jobject bitmap) {
   LOG(INFO) << "jniBitmapPeopleDet";
   cv::Mat rgbaMat;
   cv::Mat bgrMat;
@@ -130,7 +130,8 @@ DLIB_JNI_METHOD(jniBitmapDetect)(JNIEnv* env, jobject thiz, jobject bitmap) {
 jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniInit)(JNIEnv* env, jobject thiz) {
   LOG(INFO) << "jniInit";
   DetectorPtr detPtr = new OpencvHOGDetctor();
-  setDetectorPtr(env, thiz, detPtr);;
+  setDetectorPtr(env, thiz, detPtr);
+  ;
   return JNI_OK;
   return JNI_OK;
 }
@@ -143,4 +144,3 @@ jint JNIEXPORT JNICALL DLIB_JNI_METHOD(jniDeInit)(JNIEnv* env, jobject thiz) {
 #ifdef __cplusplus
 }
 #endif
-

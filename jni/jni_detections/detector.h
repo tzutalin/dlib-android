@@ -33,7 +33,8 @@ class OpencvHOGDetctor {
   OpencvHOGDetctor() {}
 
   inline int det(const cv::Mat& src_img) {
-    if (src_img.empty()) return 0;
+    if (src_img.empty())
+      return 0;
 
     cv::HOGDescriptor hog;
     hog.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
@@ -44,8 +45,10 @@ class OpencvHOGDetctor {
     for (i = 0; i < found.size(); i++) {
       cv::Rect r = found[i];
       for (j = 0; j < found.size(); j++)
-        if (j != i && (r & found[j]) == r) break;
-      if (j == found.size()) found_filtered.push_back(r);
+        if (j != i && (r & found[j]) == r)
+          break;
+      if (j == found.size())
+        found_filtered.push_back(r);
     }
 
     for (i = 0; i < found_filtered.size(); i++) {
@@ -74,7 +77,7 @@ class OpencvHOGDetctor {
 
 class DLibHOGDetector {
  private:
-  typedef dlib::scan_fhog_pyramid<dlib::pyramid_down<6> > image_scanner_type;
+  typedef dlib::scan_fhog_pyramid<dlib::pyramid_down<6>> image_scanner_type;
   dlib::object_detector<image_scanner_type> mObjectDetector;
 
   inline void init() {
@@ -87,7 +90,6 @@ class DLibHOGDetector {
   }
 
  public:
-
   DLibHOGDetector(const std::string& modelPath = "/sdcard/person.svm")
       : mModelPath(modelPath) {
     init();
@@ -100,7 +102,8 @@ class DLibHOGDetector {
       return 0;
     }
     cv::Mat src_img = cv::imread(path, CV_LOAD_IMAGE_COLOR);
-    if (src_img.empty()) return 0;
+    if (src_img.empty())
+      return 0;
     int img_width = src_img.cols;
     int img_height = src_img.rows;
     int im_size_min = MIN(img_width, img_height);
@@ -169,9 +172,11 @@ class DLibHOGFaceDetector : public DLibHOGDetector {
   }
 
   // The format of mat should be BGR or Gray
-  // If converting 4 channels to 3 channls because the format could be BGRA or ARGB
+  // If converting 4 channels to 3 channls because the format could be BGRA or
+  // ARGB
   virtual inline int det(const cv::Mat& image) {
-    if (image.empty()) return 0;
+    if (image.empty())
+      return 0;
     LOG(INFO) << "com_tzutalin_dlib_PeopleDet go to det(mat)";
     if (image.channels() == 1) {
       cv::cvtColor(image, image, CV_GRAY2BGR);

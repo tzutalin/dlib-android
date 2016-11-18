@@ -34,7 +34,8 @@ static inline uint32 YUV2RGB(int nY, int nU, int nV) {
   nY -= 16;
   nU -= 128;
   nV -= 128;
-  if (nY < 0) nY = 0;
+  if (nY < 0)
+    nY = 0;
 
   // This is the floating point equivalent. We do the conversion in integer
   // because some Android devices do not have floating point in hardware.
@@ -164,7 +165,8 @@ void ConvertYUV420SPToRGB565(const uint8* const input, uint16* const output,
       nY -= 16;
       nU -= 128;
       nV -= 128;
-      if (nY < 0) nY = 0;
+      if (nY < 0)
+        nY = 0;
 
       // This is the floating point equivalent. We do the conversion in integer
       // because some Android devices do not have floating point in hardware.
