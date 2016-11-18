@@ -31,14 +31,10 @@
 
 * Prepare an Android device for test
 
-* [Optional] You can download a specific Android-OpenCV from http://opencv.org/downloads.html.  Download the version and copy the folders in native SDK to dlib-android/third_party/opencv. (Currently, itis 3.1)
-
-* [Optional] You can use [NDK Download script](https://github.com/tzutalin/android-ndk-downloader) to specify the version of NDK to download
-
-### Build and Run
+### Build JNI code and shared library for Android application
 * You can change the compiler architecture in dlib-android/jni/Application.mk
 
-* The way to build native code and copy the shared library to Android Studio's project, dlib-android-app/dlib/src/main/jniLibs
+* The way to build the shared library for Android application
 
 ```sh
     $ cd [dlib-android]
@@ -49,12 +45,27 @@ Alternative way to build native code and copy to the Android Studio's project ma
 ```sh
     $ cd [dlib-android]
     $ ndk-build -j 2
-    $ cp -r libs/* dlib-android-app/dlib/src/main/jniLibs
+    $ cp -r libs/* androidstudio-examples/dlib-android-app/dlib/src/main/jniLibs
+```
+
+### Run Android application
+* Open Android Studio's projects in androidstudio-examples/dlib-android-app to run face detection, face landmark, and so on
+
+### Folder struction
+
+```
+├── data                    # Test data or the model for detection and landmarks
+├── dlib                    # Source files of dlib
+├── jni                     # Source files of JNI codes and their make files
+├── androidstudio-examples  # Android Studio's projects use the shared library built by this repo
+├── tools                   # Tools and utilities
+├── third_party             # Like OpenCV and [miniglog](https://github.com/tzutalin/miniglog)
+├── LICENSE
+└── README.md
 ```
 
 ### Do you want to contribute
  * If you have any improvement or you've found any bug, send a pull request with the code.
-
  * Give me a star on this repository
 
 ### Future tasks

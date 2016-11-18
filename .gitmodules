@@ -1,9 +1,9 @@
 [submodule "third_party/miniglog"]
 	path = third_party/miniglog
 	url = https://github.com/tzutalin/miniglog.git
-[submodule "jni/dlib"]
-	path = jni/dlib
+[submodule "dlib"]
+	path = dlib
 	url = https://github.com/davisking/dlib.git
-[submodule "dlib-android-app"]
-	path = dlib-android-app
+[submodule "androidstudio-examples/dlib-android-app"]
+	path = androidstudio-examples/dlib-android-app
 	url = https://github.com/tzutalin/dlib-android-app.git

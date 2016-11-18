@@ -14,7 +14,7 @@ before_install:
   - date
   - ./envsetup 1> /dev/null 2%>1
   - cd $TRAVIS_BUILD_DIR
-  - cd ./travis-ci
+  - cd tools/travis-ci
   - sh setupNDK.sh
   - export PATH=`pwd`/android-ndk:$PATH
   - echo $PATH
