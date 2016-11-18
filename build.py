@@ -6,7 +6,8 @@ import shutil
 import subprocess
 from subprocess import Popen, PIPE
 
-DEVICE_ABI = 'armeabi-v7a';
+DEVICE_ABI = 'armeabi-v7a'
+
 
 class PrintColors:
     HEADER = '\033[95m'
@@ -17,6 +18,7 @@ class PrintColors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 def parse_args():
     """
@@ -42,34 +44,42 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
 def ndk_build(args):
     jobs = str(args.jobs)
     isDebug = '1' if args.debug else '0'
     build_cmd = ['ndk-build',
-               '-j' + jobs,
-               'NDK_LOG=1',
-               'NDK_DEBUG=' + isDebug,
-               'V=0']
+                 '-j' + jobs,
+                 'NDK_LOG=1',
+                 'NDK_DEBUG=' + isDebug,
+                 'V=0']
     # Print the build command
     print PrintColors.UNDERLINE + 'ndk build arguments:' + str(build_cmd) + PrintColors.ENDC
     ret = subprocess.call(build_cmd)
     if ret is not 0:
-        print PrintColors.FAIL + 'Build error' + PrintColors.ENDC
+        print PrintColors.FAIL + 'Build Error' + PrintColors.ENDC
         os.sys.exit(1)
+    else:
+        print PrintColors.OKBLUE + 'Build Pass' + PrintColors.ENDC
+
 
 def ndk_clean():
     subprocess.call(['ndk-build', 'clean'])
 
+
 def setDeviceABI():
     global DEVICE_ABI
-    p = subprocess.Popen(['adb', 'shell', 'getprop', 'ro.product.cpu.abi'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    output, err = p.communicate(b"input data that is passed to subprocess' stdin")
+    p = subprocess.Popen(
+        ['adb', 'shell', 'getprop', 'ro.product.cpu.abi'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate(
+        b"input data that is passed to subprocess' stdin")
     rc = p.returncode
     if rc == 0:
         if "x86" in output:
             DEVICE_ABI = 'x86'
 
     print PrintColors.OKBLUE + 'We will use ABI:' + DEVICE_ABI + ' binaries to test ' + PrintColors.ENDC
+
 
 def test():
     global DEVICE_ABI
@@ -91,7 +101,8 @@ def test():
     srcFolder = os.path.join('libs', DEVICE_ABI, 'TestSelectiveSearch')
     subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp'])
     print '----Execute /data/local/tmp/TestSelectiveSearch'
-    subprocess.call(['adb', 'shell', './data/local/tmp/TestSelectiveSearch','/data/local/tmp/lena.jpg'])
+    subprocess.call(
+        ['adb', 'shell', './data/local/tmp/TestSelectiveSearch', '/data/local/tmp/lena.jpg'])
 
     print '\n\n'
     print 'Test face landmark'
@@ -102,7 +113,9 @@ def test():
     srcFolder = os.path.join('libs', DEVICE_ABI, 'face_landmark')
     subprocess.call(['adb', 'push', srcFolder, '/data/local/tmp'])
     print '----Execute /data/local/tmp/face_lanmark'
-    subprocess.call(['adb', 'shell', './data/local/tmp/face_landmark', '/data/local/tmp/shape_predictor_68_face_landmarks.dat', '/data/local/tmp/lena.bmp'])
+    subprocess.call(['adb', 'shell', './data/local/tmp/face_landmark',
+                    '/data/local/tmp/shape_predictor_68_face_landmarks.dat', '/data/local/tmp/lena.bmp'])
+
 
 def copytree(src, dst, symlinks=False, ignore=None):
     if not os.path.exists(dst):
@@ -115,6 +128,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
         else:
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
+
 
 def copySoToAS(src, dst):
     for root, subdirs, files in os.walk(src):
