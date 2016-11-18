@@ -4,8 +4,8 @@
  *
  * Copyright (c) 2016 Darren. All rights reserved.
  */
-#include <common/jni_utils.h>
-#include <common/jni_primitives.h>
+#include <jni_common/jni_utils.h>
+#include <jni_common/jni_primitives.h>
 #include <glog/logging.h>
 #include <sstream>
 #include <unistd.h>

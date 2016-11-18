@@ -7,10 +7,10 @@
  *  Copyright (c) 2015 Tzutalin. All rights reserved.
  */
 #include <android/bitmap.h>
-#include <common/jni_bitmap2mat.h>
-#include <common/jni_primitives.h>
-#include <common/jni_fileutils.h>
-#include <common/jni_utils.h>
+#include <jni_common/jni_bitmap2mat.h>
+#include <jni_common/jni_primitives.h>
+#include <jni_common/jni_fileutils.h>
+#include <jni_common/jni_utils.h>
 #include <detector.h>
 #include <jni.h>
 

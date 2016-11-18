@@ -6,9 +6,9 @@
  *
  *  Copyright (c) 2016 Tzutalin. All rights reserved.
  */
-#include <common/rgb2yuv.h>
-#include <common/types.h>
-#include <common/yuv2rgb.h>
+#include <jni_common/rgb2yuv.h>
+#include <jni_common/types.h>
+#include <jni_common/yuv2rgb.h>
 #include <glog/logging.h>
 #include <jni.h>
 #include <stdio.h>

@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <common/types.h>
+#include <jni_common/types.h>
 namespace jnicommon {
 
 #ifdef __cplusplus

@@ -6,7 +6,7 @@
  *
  *  Copyright (c) 2016 Tzutalin. All rights reserved.
  */
-#include <common/yuv2rgb.h>
+#include <jni_common/yuv2rgb.h>
 
 namespace jnicommon {
 
