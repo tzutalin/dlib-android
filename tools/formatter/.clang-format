@@ -1,0 +1,12 @@
+BasedOnStyle: Google
+Language: Cpp
+IndentCaseLabels: false
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left
+ColumnLimit: 80
+MaxEmptyLinesToKeep: 2
+SpacesBeforeTrailingComments: 2
+AllowShortIfStatementsOnASingleLine: false
+Cpp11BracedListStyle: true
+Standard: Cpp11
