@@ -51,11 +51,11 @@ Alternative way to build native code and copy to the Android Studio's project ma
 ### Run Android application
 * Open Android Studio's projects in androidstudio-examples/dlib-android-app to run face detection, face landmark, and so on
 
-### Folder struction
+### Folder structure
 
 ```
-├── data                    # Test data or the model for detection and landmarks
-├── dlib                    # Source files of dlib
+├── data                    # Test data or the models for detection and landmarks
+├── dlib                    # Source files of dlib. It is a submodule
 ├── jni                     # Source files of JNI codes and their make files
 ├── androidstudio-examples  # Android Studio's projects use the shared library built by this repo
 ├── tools                   # Tools and utilities
