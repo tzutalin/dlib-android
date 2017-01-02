@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/jni_fileutils.h>
+#include <jni_common/jni_fileutils.h>
 #include <dlib/image_loader/load_image.h>
 #include <dlib/image_processing.h>
 #include <dlib/image_processing/frontal_face_detector.h>
