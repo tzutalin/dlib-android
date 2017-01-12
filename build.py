@@ -1,4 +1,23 @@
 #!/usr/bin/env python
+# Copyright (c) 2017 Tzutalin
+# Create by TzuTaLin <tzu.ta.lin@gmail.com>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os
 import sys
 import argparse
@@ -7,7 +26,6 @@ import subprocess
 from subprocess import Popen, PIPE
 
 DEVICE_ABI = 'armeabi-v7a'
-
 
 class PrintColors:
     HEADER = '\033[95m'
@@ -137,6 +155,37 @@ def copySoToAS(src, dst):
                 path = os.path.join(root, f)
                 abis = os.path.basename(os.path.dirname(path))
                 shutil.copy(path, os.path.join(dst, abis))
+
+# TODO : Refactor
+def test_cmake():
+    curr = os.getcwd()
+    buildFolder = 'build'
+    if os.path.exists(buildFolder):
+        shutil.rmtree(buildFolder)
+
+    os.mkdir(buildFolder)
+    os.chdir(buildFolder)
+    cmake_cmd = ['cmake']
+    build_cmd = ['make']
+    ABI = 'arm64-v8a'
+    # ABI = 'x86'
+    # TODO
+    NDK_PATH = '/home/darrenl/tools/android-ndk-r10e'
+    cmake_cmd = cmake_cmd + ['-DCMAKE_SYSTEM_NAME=Android', '-DCMAKE_SYSTEM_VERSION=21',
+                                '-DCMAKE_ANDROID_ARCH_ABI=' + ABI, '-DCMAKE_ANDROID_STL_TYPE=gnustl_static',
+                                '-DCMAKE_ANDROID_NDK=' + NDK_PATH]
+    cmake_cmd = cmake_cmd + ['-D', 'CMAKE_INSTALL_PREFIX=.']
+    cmake_cmd = cmake_cmd + ['..']
+    # Print the build command
+    print PrintColors.UNDERLINE + 'cmake build arguments:' + str(cmake_cmd) + PrintColors.ENDC
+    ret = subprocess.call(cmake_cmd)
+    ret = subprocess.call(build_cmd)
+    if ret is not 0:
+        print PrintColors.FAIL + 'Build Error' + PrintColors.ENDC
+        os.sys.exit(1)
+    else:
+        print PrintColors.OKBLUE + 'Build Pass' + PrintColors.ENDC
+
 
 if __name__ == '__main__':
     # Move to top-level
