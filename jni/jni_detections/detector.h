@@ -131,6 +131,8 @@ class DLibHOGDetector {
 
   inline std::vector<dlib::rectangle> getResult() { return mRets; }
 
+  virtual ~DLibHOGDetector() {}
+
  protected:
   std::vector<dlib::rectangle> mRets;
   std::string mModelPath;
