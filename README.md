@@ -60,7 +60,7 @@ Alternative way to build native code and copy to the Android Studio's project ma
 ├── androidstudio-examples  # Android Studio's projects use the shared library built by this repo
 ├── tools                   # Tools and utilities
 ├── third_party             # Like OpenCV and [miniglog](https://github.com/tzutalin/miniglog)
-├── CMakeLists.txt          # Use CMake to build instead of using Android
+├── CMakeLists.txt          # Use CMake to build instead of using Android.mk
 ├── LICENSE
 └── README.md
 ```
