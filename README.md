@@ -34,7 +34,7 @@
 ### Build JNI code and shared library for Android application
 * You can change the compiler architecture in dlib-android/jni/Application.mk
 
-* Android Studio build JNI code and move to use them, but if you don't compile Android Studio run in command line:
+* Android Studio build JNI code and move to libs folder to use them, but if you don't compile the ndk run in command line to build and see warnings:
 
 ```sh
     $ cd [dlib-android]/app/src/main/jni
@@ -43,19 +43,6 @@
 
 ### Run Android application
 * Open Android Studio's project dlib-android to run face detection, face landmark, and so on
-
-### Folder structure
-
-```
-├── data                    # Test data or the models for detection and landmarks
-├── dlib                    # Source files of dlib. It is a submodule
-├── jni                     # Source files of JNI codes and their make files
-├── androidstudio-examples  # Android Studio's projects use the shared library built by this repo
-├── tools                   # Tools and utilities
-├── third_party             # Like OpenCV and [miniglog](https://github.com/tzutalin/miniglog)
-├── CMakeLists.txt          # Use CMake to build instead of using Android.mk
-├── LICENSE
-└── README.md
 ```
 
 ### Do you want to contribute
