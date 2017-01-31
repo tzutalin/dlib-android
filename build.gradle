@@ -1,0 +1,32 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+        classpath "com.github.dcendents:android-maven-gradle-plugin:1.4.1"
+    }
+}
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    groupName = 'com.github.tzutalin'
+    artifactName = 'dlib-android-app'
+    artifactDescription = 'An Android library to wrap dlib library to use face and landmark detection'
+    artifactLabels = ['dlib', 'android']
+    releaseVersionCode = 1
+    releaseVersionName = '1.0.4'
+}

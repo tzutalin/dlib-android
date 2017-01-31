@@ -7,7 +7,7 @@
 
 * You can build it to dynamic or static library for Android. You can also build dlib's sample to Android executable file.
 
-* You can refer to [dlib-android-app](https://github.com/tzutalin/dlib-android-app) which demonstrates dlib-android features
+* This demonstrates dlib-android features, building with JNI.
 
 ### Grab the source
 
@@ -34,22 +34,15 @@
 ### Build JNI code and shared library for Android application
 * You can change the compiler architecture in dlib-android/jni/Application.mk
 
-* The way to build the shared library for Android application
+* Android Studio build JNI code and move to use them, but if you don't compile Android Studio run in command line:
 
 ```sh
-    $ cd [dlib-android]
-    $ python build.py
-```
-
-Alternative way to build native code and copy to the Android Studio's project manually:
-```sh
-    $ cd [dlib-android]
-    $ ndk-build -j 2
-    $ cp -r libs/* androidstudio-examples/dlib-android-app/dlib/src/main/jniLibs
+    $ cd [dlib-android]/app/src/main/jni
+    $ ndk-build
 ```
 
 ### Run Android application
-* Open Android Studio's projects in androidstudio-examples/dlib-android-app to run face detection, face landmark, and so on
+* Open Android Studio's project dlib-android to run face detection, face landmark, and so on
 
 ### Folder structure
 
