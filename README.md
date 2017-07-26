@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/tzutalin/dlib-android.png)](https://travis-ci.org/tzutalin/dlib-android)
 
 ### Purpose
-* Port [dlib](http://dlib.net/) to Andriod platform
+* Port [dlib](http://dlib.net/) to Android platform
 
 * You can build it to dynamic or static library for Android. You can also build dlib's sample to Android executable file.
 
