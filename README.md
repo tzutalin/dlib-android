@@ -68,6 +68,7 @@ Alternative way to build native code and copy to the Android Studio's project ma
 ### Do you want to contribute
  * If you have any improvement or you've found any bug, send a pull request with the code.
  * Give me a star on this repository
+ * <a href='https://ko-fi.com/A4263TV2' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 ### Future tasks
 * Add more examples to [dlib-android-app](https://github.com/tzutalin/dlib-android-app)
