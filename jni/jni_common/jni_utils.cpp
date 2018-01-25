@@ -4,6 +4,7 @@
  *
  * Copyright (c) 2016 Darren. All rights reserved.
  */
+#include <cstring>
 #include <jni_common/jni_utils.h>
 #include <jni_common/jni_primitives.h>
 #include <glog/logging.h>
